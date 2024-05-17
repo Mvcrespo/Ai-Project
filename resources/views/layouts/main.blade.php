@@ -37,7 +37,7 @@
                         <x-menus.menu-item
                             content="Filmes"
                             href="#"
-                            selected="#"
+                            selected="{{Route::currentRouteName()=='#'}}"
                         />
 
                         <div class="grow"></div>
@@ -49,38 +49,51 @@
                             selected="1"
                             total="2"/>
 
-                        <x-menus.submenu
-                            selectable="0"
-                            uniqueName="submenu_user"
-                            >
-                            <x-slot:content>
-                                <div class="pe-1">
-                                    <img src="{{ Vite::asset('resources/img/photos/photo_example.jpeg') }}" class="w-11 h-11 min-w-11 min-h-11 rounded-full">
-                                </div>
-                                {{-- ATENÇÃO - ALTERAR FORMULA DE CALCULO DAS LARGURAS MÁXIMAS QUANDO O MENU FOR ALTERADO --}}
-                                <div class="ps-1 sm:max-w-[calc(100vw-39rem)] md:max-w-[calc(100vw-41rem)] lg:max-w-[calc(100vw-46rem)] xl:max-w-[34rem] truncate">
-                                    João Miguel da Silva Pereira Antunes
-                                </div>
-                            </x-slot>
-                            <x-menus.submenu-item
-                                content="My Bilhetes"
+                            @auth
+                            <x-menus.submenu
                                 selectable="0"
-                                href="#"/>
-                            <hr>
-                            <x-menus.submenu-item
-                                content="Profile"
-                                selectable="0"
-                                href="#"/>
-                            <x-menus.submenu-item
-                                content="Change Password"
-                                selectable="0"
-                                href="#"/>
-                            <hr>
-                            <x-menus.submenu-item
-                                content="Log Out"
-                                selectable="0"
-                                href="#"/>
-                        </x-menus.submenu>
+                                uniqueName="submenu_user"
+                                >
+                                <x-slot:content>
+                                    <div class="pe-1">
+                                        <img src="{{ Auth::user()->photoFullUrl}}" class="w-11 h-11 min-w-11 min-h-11 rounded-full">
+                                    </div>
+                                    {{-- ATENÇÃO - ALTERAR FORMULA DE CALCULO DAS LARGURAS MÁXIMAS QUANDO O MENU FOR ALTERADO --}}
+                                    <div class="ps-1 sm:max-w-[calc(100vw-39rem)] md:max-w-[calc(100vw-41rem)] lg:max-w-[calc(100vw-46rem)] xl:max-w-[34rem] truncate">
+                                        {{ Auth::user()->name }}
+                                    </div>
+                                </x-slot>
+
+
+                                <hr>
+                                <x-menus.submenu-item
+                                    content="Profile"
+                                    selectable="0"
+                                    href="#"/>
+                                <x-menus.submenu-item
+                                    content="Change Password"
+                                    selectable="0"
+                                    href="{{ route('profile.edit.password') }}"/>
+
+                                <hr>
+                                <form id="form_to_logout_from_menu" method="POST" action="{{ route('logout') }}" class="hidden">
+                                    @csrf
+                                </form>
+                                <x-menus.submenu-item
+                                    content="Log Out"
+                                    selectable="0"
+                                    form="form_to_logout_from_menu"/>
+                            </x-menus.submenu>
+                            @else
+                            <!-- Menu Item: Login -->
+                            <x-menus.menu-item
+                                content="Login"
+                                selectable="1"
+                                href="{{ route('login') }}"
+                                selected="{{ Route::currentRouteName() == 'login'}}"
+                                />
+                            @endauth
+
                     </div>
                     <!-- Hamburger -->
                     <div class="absolute right-0 top-0 flex sm:hidden pt-3 pe-3 text-black dark:text-gray-50">
@@ -101,7 +114,7 @@
         <header class="bg-white dark:bg-gray-900 shadow">
             <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                 <h4 class="mb-1 text-base text-gray-500 dark:text-gray-400 leading-tight">
-                    CineTeste
+                    CineLiz
                 </h4>
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                     @yield('header-title')

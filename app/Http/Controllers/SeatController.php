@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Movie;
+use App\Models\Seat;
 use Illuminate\Http\Request;
 
-class MovieController extends Controller
+class SeatController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class MovieController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Movie $movie)
+    public function show(Seat $seat)
     {
         //
     }
@@ -42,7 +42,7 @@ class MovieController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Movie $movie)
+    public function edit(Seat $seat)
     {
         //
     }
@@ -50,7 +50,7 @@ class MovieController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Movie $movie)
+    public function update(Request $request, Seat $seat)
     {
         //
     }
@@ -58,7 +58,7 @@ class MovieController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Movie $movie)
+    public function destroy(Seat $seat)
     {
         //
     }

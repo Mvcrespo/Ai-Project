@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\CourseController;
-use App\Http\Controllers\DisciplineController;
-use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\GenreController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
+
 
 // REPLACE THIS
 // Route::get('/', function () {
@@ -12,3 +12,12 @@ use Illuminate\Support\Facades\Route;
 
 //WITH THIS
 Route::view('/', 'home')->name('home');
+Route::middleware('auth')->group(function () {
+    Route::get('/password', [ProfileController::class, 'editPassword'])->name('profile.edit.password');
+});
+
+Route::view('/dashboard', 'dashboard')->name('dashboard');
+
+require __DIR__ . '/auth.php';
+
+Route::resource("genres", GenreController::class);
