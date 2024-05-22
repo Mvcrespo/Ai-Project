@@ -1,33 +1,40 @@
 @extends('layouts.main')
 
-@section('header-title', 'Introduction')
+@section('header-title', 'Movies on Show')
 
 @section('main')
 <main>
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="my-4 p-6 bg-white dark:bg-gray-900 overflow-hidden shadow-sm sm:rounded-lg text-gray-900 dark:text-gray-50">
-            <h3 class="pb-3 font-semibold text-lg text-gray-800 dark:text-gray-200 leading-tight">
-                Cinema Parte inicial
-            </h3>
-            <p class="py-3 font-medium text-gray-700 dark:text-gray-300">
-                Pagina de teste Inicial
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                @if($movies->isEmpty())
-                    <p>Nenhum filme encontrado.</p>
-                @else
-                    @foreach($movies as $movie)
-                        <div class="relative group bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                            <img src="{{ $movie->poster_full_url }}" alt="{{ $movie->title }}" class="w-full h-auto">
-                            <div class="absolute bottom-0 left-0 right-0 bg-white bg-opacity-90 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <h4 class="font-semibold text-gray-800">{{ $movie->title }}</h4>
-                                <p class="text-gray-600">{{ $movie->year }}</p>
-                                <p class="text-gray-600">{{ $movie->genre->name }}</p>
-                            </div>
-                        </div>
+        <div class="my-4 p-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg text-gray-900 dark:text-gray-50">
+            <form action="{{ route('movies.highlighted_search') }}" method="GET" class="pb-6 flex space-x-4">
+                <input type="text" name="query" placeholder="Search highlighted movies..." class="px-4 py-2 border rounded-md w-full bg-gray-100 dark:bg-gray-700 dark:text-white" value="{{ request('query') }}">
+                <select name="genre" class="px-4 py-2 border rounded-md bg-gray-100 dark:bg-gray-700 dark:text-white">
+                    <option value="">All Genres</option>
+                    @foreach($genres as $genre)
+                        <option value="{{ $genre->code }}" {{ request('genre') == $genre->code ? 'selected' : '' }}>{{ $genre->name }}</option>
                     @endforeach
-                @endif
-            </div>
+                </select>
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">Search</button>
+            </form>
+            @php
+                $highlightedMovies = $movies->filter(function($movie) {
+                    return $movie->screenings->whereBetween('date', [now(), now()->addWeeks(2)])->isNotEmpty();
+                });
+
+                if (request('query')) {
+                    $highlightedMovies = $highlightedMovies->filter(function($movie) {
+                        return str_contains(strtolower($movie->title), strtolower(request('query'))) ||
+                               str_contains(strtolower($movie->synopsis), strtolower(request('query')));
+                    });
+                }
+
+                if (request('genre')) {
+                    $highlightedMovies = $highlightedMovies->filter(function($movie) {
+                        return $movie->genre_code == request('genre');
+                    });
+                }
+            @endphp
+            @include('movies.shared.movies-list', ['movies' => $highlightedMovies])
         </div>
     </div>
 </main>

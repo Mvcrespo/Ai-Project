@@ -22,7 +22,7 @@
                         @include('genres.shared.fields', ['mode' => 'create'])
                     </div>
                     <div class="flex mt-6">
-                        <x-button element="submit" type="dark" text="Save new department" class="uppercase"/>
+                        <x-button element="submit" type="dark" text="Save new Genre" class="uppercase"/>
                     </div>
                 </form>
             </section>

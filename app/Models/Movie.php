@@ -6,26 +6,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Movie extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable =['title', 'genre_code', 'year', 'poster_filename', 'synopsis'];
+    protected $fillable = ['title', 'genre_code', 'year', 'poster_filename', 'synopsis', 'trailer_url'];
 
-
-    public function genre():BelongsTo
+    public function genre(): BelongsTo
     {
-        return $this->belongsTo(Genre::class,'genre_code','code')->withTrashed();
-
+        return $this->belongsTo(Genre::class, 'genre_code', 'code')->withTrashed();
     }
 
-    public function screenings():HasMany
+    public function screenings(): HasMany
     {
-        return $this->hasMany(Screening::class());
-
+        return $this->hasMany(Screening::class);
     }
 
     public function getPosterFullUrlAttribute()
@@ -36,4 +33,14 @@ class Movie extends Model
             return asset("img/default_poster.jpg");
         }
     }
+
+    public function getTrailerEmbedUrlAttribute()
+    {
+        if (str_contains($this->trailer_url, 'watch?v=')) {
+            return str_replace('watch?v=', 'embed/', $this->trailer_url);
+        } else {
+            return $this->trailer_url;
+        }
+    }
 }
+
