@@ -4,15 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Movie;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class MovieController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): View
     {
-        //
+        $movies = Movie::all();
+        return view('movies.index')->with('movies', $movies);
     }
 
     /**

@@ -3,7 +3,7 @@
 use App\Http\Controllers\GenreController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
-
+use App\Http\Controllers\MovieController;
 
 // REPLACE THIS
 // Route::get('/', function () {
@@ -21,3 +21,5 @@ Route::view('/dashboard', 'dashboard')->name('dashboard');
 require __DIR__ . '/auth.php';
 
 Route::resource("genres", GenreController::class);
+
+Route::get('/movies', [MovieController::class, 'index'])->name('movies.index');
