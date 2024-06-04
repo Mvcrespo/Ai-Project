@@ -4,111 +4,120 @@ namespace App\Http\Controllers;
 
 use App\Models\Movie;
 use App\Models\Genre;
+use App\Http\Requests\MovieFormRequest;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-class MovieController extends Controller
+class MovieController extends \Illuminate\Routing\Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    use AuthorizesRequests;
+
+    public function __construct()
+    {
+        $this->authorizeResource(Movie::class);
+    }
+
+    public function index(): View
+    {
+        $movies = Movie::orderBy('title')->paginate(20);
+        return view('movies.index')->with('movies', $movies);
+    }
+
+    public function create(): View
+    {
+        $newmovie = new Movie();
+        return view('movies.create')->with('movie', $newmovie);
+    }
+
+    public function store(MovieFormRequest $request): RedirectResponse
+    {
+        // Handle file upload
+        $data = $request->validated();
+        if ($request->hasFile('poster_filename')) {
+            $file = $request->file('poster_filename');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/posters', $filename);
+            $data['poster_filename'] = $filename;
+        }
+
+        $newmovie = Movie::create($data);
+        $url = route('movies.show', ['movie' => $newmovie]);
+        $htmlMessage = "Movie <a href='$url'><u>{$newmovie->title}</u></a> ({$newmovie->id}) has been created successfully!";
+        return redirect()->route('movies.index')
+            ->with('alert-type', 'success')
+            ->with('alert-msg', $htmlMessage);
+    }
+
+    public function edit(Movie $movie): View
+    {
+        return view('movies.edit')->with('movie', $movie);
+    }
+
+    public function update(MovieFormRequest $request, Movie $movie): RedirectResponse
+    {
+        // Handle file upload
+        $data = $request->validated();
+        if ($request->hasFile('poster_filename')) {
+            $file = $request->file('poster_filename');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/posters', $filename);
+            $data['poster_filename'] = $filename;
+        } else {
+            // Keep the original poster_filename if no new file is uploaded
+            $data['poster_filename'] = $movie->poster_filename;
+        }
+
+        $movie->update($data);
+        $url = route('movies.show', ['movie' => $movie]);
+        $htmlMessage = "Movie <a href='$url'><u>{$movie->title}</u></a> ({$movie->id}) has been updated successfully!";
+        return redirect()->route('movies.index')
+            ->with('alert-type', 'success')
+            ->with('alert-msg', $htmlMessage);
+    }
+
+    public function destroy(Movie $movie): RedirectResponse
+    {
+        $movie->delete();
+
+        $alertType = 'success';
+        $alertMsg = "Movie {$movie->title} ({$movie->id}) has been deleted successfully!";
+
+        return redirect()->route('movies.index')
+            ->with('alert-type', $alertType)
+            ->with('alert-msg', $alertMsg);
+    }
+
+    public function show(Movie $movie): View
+    {
+        return view('movies.show')->with('movie', $movie);
+    }
+
+    public function high(Movie $movie): View
     {
         $movies = Movie::with('screenings')->get();
         $genres = Genre::all();
-        return view('movies.index', compact('movies', 'genres'));
-    }
-
-    public function allmovies(Request $request)
-    {
-        $query = Movie::query();
-
-        if ($request->has('query') && $request->query('query') != null) {
-            $searchQuery = $request->query('query');
-            $query->where(function($q) use ($searchQuery) {
-                $q->where('title', 'like', '%' . $searchQuery . '%')
-                  ->orWhere('synopsis', 'like', '%' . $searchQuery . '%');
-            });
-        }
-
-        if ($request->has('genre') && $request->query('genre') != null) {
-            $query->where('genre_code', $request->query('genre'));
-        }
-
-        $movies = $query->get();
-        $genres = Genre::all();
-
-        return view('movies.allmovies', compact('movies', 'genres'));
+        return view('movies.high', compact('movies', 'genres'));
     }
 
     public function highlighted(Request $request)
     {
         $movies = Movie::with('screenings')->get();
         $genres = Genre::all();
-        return view('movies.index', compact('movies', 'genres'));
+        return view('movies.high', compact('movies', 'genres'));
     }
 
     public function highlightedSearch(Request $request)
     {
         $movies = Movie::with('screenings')->get();
         $genres = Genre::all();
-        return view('movies.index', compact('movies', 'genres'));
+        return view('movies.high', compact('movies', 'genres'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show($id): View
+    public function high_show($id): View
     {
         $movie = Movie::with(['screenings.theater', 'screenings.tickets'])->findOrFail($id);
-        return view('movies.show', compact('movie'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Movie $movie)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Movie $movie)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Movie $movie)
-    {
-        //
-    }
-
-    /**
-     * Search for movies based on query and genre.
-     */
-    public function search(Request $request): View
-    {
-        return $this->allmovies($request);
+        return view('movies.high_show', compact('movie'));
     }
 }

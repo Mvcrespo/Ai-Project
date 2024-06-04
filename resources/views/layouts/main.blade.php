@@ -23,7 +23,7 @@
                 <div class="relative flex flex-col sm:flex-row px-6 sm:px-0 grow justify-between">
                     <!-- Logo -->
                     <div class="shrink-0 -ms-4">
-                        <a href="{{ route('movies.index') }}">
+                        <a href="{{ route('movies.high') }}">
                             <div class="h-16 w-40 relative">
                                 <div class="absolute inset-0 bg-center bg-no-repeat bg-[url('../img/CineMagic_light_mode.svg')] dark:bg-[url('../img/CineMagic_drak_mode.svg')] bg-contain"></div>
                             </div>
@@ -36,10 +36,9 @@
                         <!-- Menu Item: Filmes -->
                         <x-menus.menu-item
                             content="Filmes"
-                            href="{{ route('movies.allmovies') }}"
-                            selected="{{ request()->is('movies/*') || request()->is('movies') }}"
+                            href="{{ route('movies.high') }}"
+                            selected="{{ request()->is('/')}}"
                         />
-
 
                         <div class="grow"></div>
 

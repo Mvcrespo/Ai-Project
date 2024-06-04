@@ -5,16 +5,19 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\TheaterController;
+use App\Http\Controllers\UserController;
 
+
+// Definir a rota inicial para redirecionar para movies.high
+Route::get('/', [MovieController::class, 'high'])->name('movies.high');
 
 
 // Grupo de rotas que requerem autenticação
 Route::middleware('auth')->group(function () {
     Route::get('/password', [ProfileController::class, 'editPassword'])->name('profile.edit.password');
 });
-
-// Rota para o dashboard
-Route::view('/dashboard', 'dashboard')->name('dashboard');
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
 // Autenticação padrão do Laravel
 require __DIR__ . '/auth.php';
@@ -22,16 +25,17 @@ require __DIR__ . '/auth.php';
 // Recursos de genres (gêneros)
 Route::resource('genres', GenreController::class);
 
+// Recursos de theaters
+Route::resource('theaters', TheaterController::class);
 
-// Rota para a página inicial que lista os filmes
-Route::get('/', [MovieController::class, 'index'])->name('movies.index');
-// Rotas para os filmes
-Route::get('/movies/all', [MovieController::class, 'allmovies'])->name('movies.allmovies');
-Route::get('/movies/search', [MovieController::class, 'search'])->name('movies.search');
-Route::get('/movies/{id}', [MovieController::class, 'show'])->name('movies.show');
-
-Route::get('/movies/highlighted', [MovieController::class, 'highlighted'])->name('movies.highlighted');
-Route::get('/movies/highlighted/search', [MovieController::class, 'highlightedSearch'])->name('movies.highlighted_search');
+// Recursos de movies
+Route::resource('movies', MovieController::class);
+// Rotas para os filmes highlighted
+Route::get('/highlighted', [MovieController::class, 'highlighted'])->name('movies.highlighted');
+Route::get('/highlighted/search', [MovieController::class, 'highlightedSearch'])->name('movies.highlighted_search');
+Route::get('/high_movie/{id}', [MovieController::class, 'high_show'])->name('movies.high_show');
 
 
-Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+Route::resource('users', UserController::class);
+
+Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');

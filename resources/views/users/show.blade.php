@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('header-title', $movie->title)
+@section('header-title', $user->name)
 
 @section('main')
 <div class="flex flex-col space-y-6">
@@ -8,20 +8,20 @@
         <div class="max-full">
             <section>
                 <div class="flex flex-wrap justify-end items-center gap-4 mb-4">
-                    @can('create', App\Models\movie::class)
+                    @can('create', App\Models\user::class)
                     <x-button
-                        href="{{ route('movies.create') }}"
+                        href="{{ route('users.create') }}"
                         text="New"
                         type="success"/>
                     @endcan
-                    @can('update', $movie)
+                    @can('update', $user)
                     <x-button
-                        href="{{ route('movies.edit', ['movie' => $movie]) }}"
+                        href="{{ route('users.edit', ['user' => $user]) }}"
                         text="Edit"
                         type="primary"/>
                     @endcan
-                    @can('delete', $movie)
-                    <form method="POST" action="{{ route('movies.destroy', ['movie' => $movie]) }}">
+                    @can('delete', $user)
+                    <form method="POST" action="{{ route('users.destroy', ['user' => $user]) }}">
                         @csrf
                         @method('DELETE')
                         <x-button
@@ -33,11 +33,11 @@
                 </div>
                 <header>
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        Movie: "{{ $movie->title }}"
+                        user "{{ $user->name }}"
                     </h2>
                 </header>
                 <div class="mt-6 space-y-4">
-                    @include('movies.shared.fields', ['mode' => 'show'])
+                    @include('users.shared.fields', ['mode' => 'show'])
                 </div>
             </section>
         </div>

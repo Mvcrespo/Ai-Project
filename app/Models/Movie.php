@@ -2,16 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Movie extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected $primaryKey = "id";
+
+    public $incrementing = true;
+    public $timestamps = true;
+    protected $keyType = "int";
 
     protected $fillable = ['title', 'genre_code', 'year', 'poster_filename', 'synopsis', 'trailer_url'];
 
@@ -43,4 +49,3 @@ class Movie extends Model
         }
     }
 }
-

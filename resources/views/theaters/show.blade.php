@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('header-title', $movie->title)
+@section('header-title', 'Theater "' . $theater->name . '"')
 
 @section('main')
 <div class="flex flex-col space-y-6">
@@ -8,20 +8,20 @@
         <div class="max-full">
             <section>
                 <div class="flex flex-wrap justify-end items-center gap-4 mb-4">
-                    @can('create', App\Models\movie::class)
+                    @can('create', App\Models\User::class)
                     <x-button
-                        href="{{ route('movies.create') }}"
+                        href="{{ route('theaters.create') }}"
                         text="New"
                         type="success"/>
                     @endcan
-                    @can('update', $movie)
+                    @can('update', $theater)
                     <x-button
-                        href="{{ route('movies.edit', ['movie' => $movie]) }}"
+                        href="{{ route('theaters.edit', ['theater' => $theater]) }}"
                         text="Edit"
                         type="primary"/>
                     @endcan
-                    @can('delete', $movie)
-                    <form method="POST" action="{{ route('movies.destroy', ['movie' => $movie]) }}">
+                    @can('delete', $theater)
+                    <form method="POST" action="{{ route('theaters.destroy', ['theater' => $theater]) }}">
                         @csrf
                         @method('DELETE')
                         <x-button
@@ -33,12 +33,10 @@
                 </div>
                 <header>
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        Movie: "{{ $movie->title }}"
+                        Theater "{{ $theater->name }}"
                     </h2>
                 </header>
-                <div class="mt-6 space-y-4">
-                    @include('movies.shared.fields', ['mode' => 'show'])
-                </div>
+                @include('theaters.shared.fields', ['mode' => 'show'])
             </section>
         </div>
     </div>

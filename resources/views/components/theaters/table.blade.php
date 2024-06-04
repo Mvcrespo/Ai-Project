@@ -2,7 +2,7 @@
     <table class="table-auto border-collapse">
         <thead>
         <tr class="border-b-2 border-b-gray-400 dark:border-b-gray-500 bg-gray-100 dark:bg-gray-800">
-            <th class="px-2 py-2 text-left hidden lg:table-cell">Code</th>
+            <th class="px-2 py-2 text-left hidden lg:table-cell">Image</th>
             <th class="px-2 py-2 text-left">Name</th>
             @if($showView)
                 <th></th>
@@ -16,35 +16,39 @@
         </tr>
         </thead>
         <tbody>
-        @foreach ($genres as $genre)
+        @foreach ($theaters as $theater)
             <tr class="border-b border-b-gray-400 dark:border-b-gray-500">
-                <td class="px-2 py-2 text-left hidden lg:table-cell">{{ $genre->code }}</td>
-                <td class="px-2 py-2 text-left">{{ $genre->name }}</td>
+                <td class="px-2 py-2 text-left">
+                    <img src="{{$theater->photoFullUrl}}" alt="Theater Photo" width="100">
+                </td>
+                <td class="px-2 py-2 text-left">
+                    {{$theater->name}}
+                </td>
                 @if($showView)
-                    @can('view', $genre)
+                    @can('view', $theater)
                         <td>
                             <x-table.icon-show class="ps-3 px-0.5"
-                                href="{{ route('genres.show', ['genre' => $genre]) }}"/>
+                                href="{{ route('theaters.show', ['theater' => $theater]) }}"/>
                         </td>
                     @else
                         <td></td>
                     @endcan
                 @endif
                 @if($showEdit)
-                    @can('update', $genre)
+                    @can('update', $theater)
                         <td>
                             <x-table.icon-edit class="px-0.5"
-                                href="{{ route('genres.edit', ['genre' => $genre]) }}"/>
+                                href="{{ route('theaters.edit', ['theater' => $theater]) }}"/>
                         </td>
                     @else
                         <td></td>
                     @endcan
                 @endif
                 @if($showDelete)
-                    @can('delete', $genre)
+                    @can('delete', $theater)
                         <td>
                             <x-table.icon-delete class="px-0.5"
-                                action="{{ route('genres.destroy', ['genre' => $genre]) }}"/>
+                                action="{{ route('theaters.destroy', ['theater' => $theater]) }}"/>
                         </td>
                     @else
                         <td></td>
