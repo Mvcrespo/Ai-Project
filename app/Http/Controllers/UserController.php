@@ -18,12 +18,18 @@ class UserController extends \Illuminate\Routing\Controller
         $this->authorizeResource(User::class);
     }
 
-    public function index(): View
+    public function index(Request $request)
     {
-        $users = User::whereIn('type', ['A', 'E'])->orderBy('name')->paginate(20);
-        return view('users.index')->with('users', $users);
+        $query = User::withTrashed(); // Incluir usuários soft deletados
+
+        if ($request->has('type') && $request->type != '') {
+            $query->where('type', $request->type);
+        }
+
+        $users = $query->orderBy('name')->paginate(20);
+
+        return view('users.index', compact('users'));
     }
-    
 
     public function create(): View
     {
@@ -84,14 +90,27 @@ class UserController extends \Illuminate\Routing\Controller
 
     public function destroy(User $user): RedirectResponse
     {
-        $user->delete();
+        $user->forceDelete();
 
         $alertType = 'success';
-        $alertMsg = "User {$user->name} ({$user->id}) has been deleted successfully!";
+        $alertMsg = "User {$user->name} ({$user->id}) has been deleted permanently!";
 
         return redirect()->route('users.index')
             ->with('alert-type', $alertType)
             ->with('alert-msg', $alertMsg);
     }
-    
+
+    public function block($id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+        $user->delete(); // Soft delete
+        return redirect()->route('users.index')->with('success', 'User blocked successfully.');
+    }
+
+    public function unblock($id): RedirectResponse
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $user->restore(); // Restore soft deleted user
+        return redirect()->route('users.index')->with('success', 'User unblocked successfully.');
+    }
 }

@@ -16,11 +16,10 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
+        return view('profile.edit-profile', [
             'user' => $request->user(),
         ]);
     }
-
     public function editPassword(Request $request): View
     {
         return view('profile.edit', [
@@ -33,17 +32,27 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $data = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Handle file upload
+        if ($request->hasFile('photo_file')) {
+            $file = $request->file('photo_file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/photos', $filename);
+            $data['photo_filename'] = $filename;
         }
 
-        $request->user()->save();
+        $user->fill($data);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
-
     /**
      * Delete the user's account.
      */

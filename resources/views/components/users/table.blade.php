@@ -14,15 +14,16 @@
                 @if($showDelete)
                     <th></th>
                 @endif
+                <th></th> <!-- Coluna para bloqueio/desbloqueio -->
             </tr>
         </thead>
         <tbody>
             @foreach ($users as $user)
-                <tr class="border-b border-b-gray-400 dark:border-b-gray-500">
+                <tr class="border-b border-b-gray-400 dark:border-b-gray-500 {{ $user->trashed() ? 'bg-red-100 dark:bg-red-900' : '' }}">
                     <td class="px-2 py-2 text-left hidden lg:table-cell">{{ $user->name }}</td>
                     <td class="px-2 py-2 text-left">{{ $user->email }}</td>
                     <td class="px-2 py-2 text-left">{{ $user->type }}</td>
-                    @if($showView)
+                    @if($showView && !$user->trashed() && $user->type != 'C')
                         @can('view', $user)
                             <td>
                                 <x-table.icon-show class="ps-3 px-0.5"
@@ -32,7 +33,7 @@
                             <td></td>
                         @endcan
                     @endif
-                    @if($showEdit)
+                    @if($showEdit && !$user->trashed() && $user->type != 'C')
                         @can('update', $user)
                             <td>
                                 <x-table.icon-edit class="px-0.5"
@@ -42,7 +43,7 @@
                             <td></td>
                         @endcan
                     @endif
-                    @if($showDelete)
+                    @if($showDelete && $user->type != 'C')
                         @can('delete', $user)
                             <td>
                                 <x-table.icon-delete class="px-0.5"
@@ -51,6 +52,25 @@
                         @else
                             <td></td>
                         @endcan
+                    @endif
+                    @if($user->type == 'C')
+                        <td>
+                            @if($user->trashed())
+                                <form method="POST" action="{{ route('users.unblock', ['user' => $user]) }}">
+                                    @csrf
+                                    <button type="submit">
+                                        Unblock
+                                    </button>
+                                </form>
+                            @else
+                                <form method="POST" action="{{ route('users.block', ['user' => $user]) }}">
+                                    @csrf
+                                    <button type="submit" class="text-red-600 hover:text-red-900">
+                                        <x-table.icon-lock class="px-0.5" href="#"/>
+                                    </button>
+                                </form>
+                            @endif
+                        </td>
                     @endif
                 </tr>
             @endforeach

@@ -16,6 +16,8 @@ Route::get('/', [MovieController::class, 'high'])->name('movies.high');
 // Grupo de rotas que requerem autenticação
 Route::middleware('auth')->group(function () {
     Route::get('/password', [ProfileController::class, 'editPassword'])->name('profile.edit.password');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
@@ -37,6 +39,10 @@ Route::get('/high_movie/{id}', [MovieController::class, 'high_show'])->name('mov
 
 
 Route::resource('users', UserController::class);
+Route::post('users/{user}/block', [UserController::class, 'block'])->name('users.block');
+Route::post('users/{user}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
+Route::delete('users/{user}/destroy', [UserController::class, 'destroy'])->name('users.destroy');
 
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+
 
