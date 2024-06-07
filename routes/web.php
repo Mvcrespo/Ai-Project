@@ -39,3 +39,4 @@ Route::get('/high_movie/{id}', [MovieController::class, 'high_show'])->name('mov
 Route::resource('users', UserController::class);
 
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
+

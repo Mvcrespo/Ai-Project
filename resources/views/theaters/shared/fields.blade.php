@@ -17,13 +17,6 @@
     <div class="grow mt-6 space-y-4">
         <x-field.input name="name" label="Name" :readonly="$readonly"
                         value="{{ old('name', $theater->name) }}"/>
-        <x-field.input name="email" type="email" label="Email" :readonly="$readonly"
-                        value="{{ old('email', $theater->email) }}"/>
-        <x-field.radiogroup name="gender" label="Gender" :readonly="$readonly"
-            value="{{ old('gender', $theater->gender) }}"
-            :options="['M' => 'Masculine', 'F' => 'Feminine']"/>
-        <x-field.checkbox name="admin" label="Administrator" :readonly="$adminReadonly"
-                        value="{{ old('admin', $theater->admin) }}"/>
     </div>
     <div class="pb-6">
         <x-field.image
