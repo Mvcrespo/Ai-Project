@@ -12,7 +12,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->type === 'A';
+        return $user->type === 'A' || $user->type === 'E';
     }
 
     /**
@@ -20,7 +20,9 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        return $user->type === 'A' || $user->id === $model->id;
+        return $user->type === 'A' ||
+               ($user->type === 'E' && ($model->type === 'A' || $model->type === 'E')) ||
+               $user->id === $model->id;
     }
 
     /**
@@ -28,7 +30,7 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return $user->type === 'A';
+        return $user->type === 'A' || $user->type === 'E';
     }
 
     /**
@@ -36,7 +38,9 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return $user->type === 'A' || $user->id === $model->id;
+        return $user->type === 'A' ||
+               ($user->type === 'E' && ($model->type === 'A' || $model->type === 'E')) ||
+               $user->id === $model->id;
     }
 
     /**
@@ -44,7 +48,7 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        return $user->type === 'A';
+        return ($user->type === 'A' || $user->type === 'E') && $user->id !== $model->id && ($model->type === 'A' || $model->type === 'E');
     }
 
     /**
@@ -52,13 +56,21 @@ class UserPolicy
      */
     public function restore(User $user, User $model): bool
     {
-        return $user->type === 'A';
+        return $user->type === 'A' || $user->type === 'E';
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
     public function forceDelete(User $user, User $model): bool
+    {
+        return $user->type === 'A' || $user->type === 'E';
+    }
+
+    /**
+     * Determine whether the user can view customers.
+     */
+    public function viewCustomers(User $user): bool
     {
         return $user->type === 'A';
     }

@@ -20,10 +20,21 @@ class UserController extends \Illuminate\Routing\Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', User::class);
+
         $query = User::withTrashed(); // Incluir usuários soft deletados
 
         if ($request->has('type') && $request->type != '') {
-            $query->where('type', $request->type);
+            $type = $request->type;
+            if ($type === 'C' && !auth()->user()->can('viewCustomers', User::class)) {
+                abort(403, 'Access denied');
+            }
+            $query->where('type', $type);
+        }
+
+        // Se o usuário autenticado for um funcionário, exclua clientes da lista
+        if (auth()->user()->type === 'E') {
+            $query->whereIn('type', ['A', 'E']);
         }
 
         $users = $query->orderBy('name')->paginate(20);
@@ -58,16 +69,20 @@ class UserController extends \Illuminate\Routing\Controller
 
     public function show(User $user): View
     {
+        $this->authorize('view', $user);
         return view('users.show')->with('user', $user);
     }
 
     public function edit(User $user): View
     {
+        $this->authorize('update', $user);
         return view('users.edit', compact('user'));
     }
 
     public function update(UserFormRequest $request, User $user): RedirectResponse
     {
+        $this->authorize('update', $user);
+
         // Handle file upload
         $data = $request->validated();
         if ($request->hasFile('photo_file')) {
@@ -90,6 +105,8 @@ class UserController extends \Illuminate\Routing\Controller
 
     public function destroy(User $user): RedirectResponse
     {
+        $this->authorize('delete', $user);
+
         $user->forceDelete();
 
         $alertType = 'success';
@@ -103,6 +120,8 @@ class UserController extends \Illuminate\Routing\Controller
     public function block($id): RedirectResponse
     {
         $user = User::findOrFail($id);
+        $this->authorize('delete', $user);
+
         $user->delete(); // Soft delete
         return redirect()->route('users.index')->with('success', 'User blocked successfully.');
     }
@@ -110,6 +129,8 @@ class UserController extends \Illuminate\Routing\Controller
     public function unblock($id): RedirectResponse
     {
         $user = User::withTrashed()->findOrFail($id);
+        $this->authorize('restore', $user);
+
         $user->restore(); // Restore soft deleted user
         return redirect()->route('users.index')->with('success', 'User unblocked successfully.');
     }

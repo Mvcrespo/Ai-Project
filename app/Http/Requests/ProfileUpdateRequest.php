@@ -7,25 +7,47 @@ use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
-     */
+
     public function rules(): array
     {
+        $rules = [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $this->user()->id,
+            'nif' => 'nullable|string|min:9|max:9',
+            'payment_type' => ['nullable', Rule::in(['VISA', 'PAYPAL', 'MBWAY'])],
+            'payment_ref' => 'nullable|string|max:255',
+            'photo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ];
+
+        // Adicionar regras condicionais para payment_ref
+        if ($this->input('payment_type') === 'VISA') {
+            $rules['payment_ref'] = 'required|digits:16';
+        } elseif ($this->input('payment_type') === 'PAYPAL') {
+            $rules['payment_ref'] = 'required|email|max:255';
+        } elseif ($this->input('payment_type') === 'MBWAY') {
+            $rules['payment_ref'] = 'required|regex:/^9\d{8}$/';
+        } elseif ($this->input('payment_type') === null) {
+            $rules['payment_ref'] = 'prohibited';
+        }
+
+        return $rules;
+    }
+
+
+    public function messages(): array
+    {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($this->user()->id)],
-            'photo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
-        ];  
+            'payment_ref.required' => 'The payment reference is required when a payment type is selected.',
+            'payment_ref.digits' => 'The payment reference must be 16 digits long for VISA.',
+            'payment_ref.email' => 'The payment reference must be a valid email address for PAYPAL.',
+            'payment_ref.regex' => 'The payment reference must be a valid Portuguese mobile phone number (9 digits, starting with 9) for MBWAY.',
+            'payment_ref.prohibited' => 'The payment reference must be null when no payment type is selected.',
+        ];
     }
 }

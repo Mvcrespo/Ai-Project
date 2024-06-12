@@ -30,7 +30,6 @@
                         </a>
                     </div>
 
-
                     <!-- Menu Items -->
                     <div id="menu-container" class="grow flex flex-col sm:flex-row items-stretch invisible h-0 sm:visible sm:h-auto">
                         <!-- Menu Item: Filmes -->
@@ -44,10 +43,10 @@
 
                         <!-- Menu Item: Cart -->
                         <x-menus.cart
-                            href="#"
+                            href="{{ route('cart.show') }}"
                             selectable="0"
                             selected="1"
-                            total="2"/>
+                            total="{{ session('cart') ? session('cart')->count() : 0 }}"/>
 
                         @auth
                             <x-menus.submenu
@@ -138,6 +137,32 @@
             </div>
         </main>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cart = document.querySelector('.x-menus-cart');
+            if (cart) {
+                const cartTotal = cart.getAttribute('total');
+                updateCartTotal(cartTotal);
+            }
+
+            function updateCartTotal(total) {
+                const cartBadge = document.querySelector('.cart-total');
+                if (cartBadge) {
+                    cartBadge.textContent = total;
+                }
+            }
+
+            // Fetch updated cart total from the server periodically
+            setInterval(() => {
+                fetch('{{ route("cart.total") }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        updateCartTotal(data.total);
+                    });
+            }, 60000); // Update every minute
+        });
+    </script>
 </body>
 
 </html>

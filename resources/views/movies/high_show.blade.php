@@ -35,7 +35,9 @@
                     <select id="date-select" class="block w-full p-2.5 mb-4 bg-white border border-gray-300 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         <option value="">Escolha a Data</option>
                         @foreach ($movie->screenings->groupBy('date') as $date => $sessions)
-                            <option value="{{ $date }}">{{ $date }}</option>
+                            @if (\Carbon\Carbon::parse($date)->isToday() || \Carbon\Carbon::parse($date)->isFuture())
+                                <option value="{{ $date }}">{{ $date }}</option>
+                            @endif
                         @endforeach
                     </select>
 
@@ -44,11 +46,11 @@
                         <option value="">Escolha a Hora</option>
                     </select>
                 </div>
-                <ul id="session-details" class="list-disc list-inside mb-4">
+                <div id="session-details" class="mb-4">
                     <!-- Session details will be populated here -->
-                </ul>
+                </div>
                 <div id="go-to-theater" class="hidden">
-                    <a href="#" id="theater-link" class="inline-block px-6 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">Ir para os Assentos</a>
+                    <a href="#" id="theater-link" class="inline-block px-6 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">Buy Ticket</a>
                 </div>
             @else
                 <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200 mt-6">Sessões</h2>
@@ -95,21 +97,19 @@
                 if (selectedDate && selectedTime) {
                     const session = sessions.find(session => session.date === selectedDate && session.start_time === selectedTime);
                     if (session) {
-                        const li = document.createElement('li');
-                        li.classList.add('mb-2');
-                        li.classList.add('text-gray-700');
-                        li.classList.add('dark:text-gray-300');
-                        li.innerHTML = `
-                            <span class="font-semibold">Theater:</span> ${session.theater.name} <br>
-                            <span class="font-semibold">Date:</span> ${session.date} <br>
-                            <span class="font-semibold">Start Time:</span> ${session.start_time} <br>
-                            <span class="font-semibold">${session.isSoldOut ? 'Indisponível' : 'Disponível'}</span>
+                        const detailsHTML = `
+                            <div class="text-gray-700 dark:text-gray-300">
+                                <p><span class="font-semibold">Theater:</span> ${session.theater.name}</p>
+                                <p><span class="font-semibold">Date:</span> ${session.date}</p>
+                                <p><span class="font-semibold">Start Time:</span> ${session.start_time}</p>
+                                <p class="${session.isSoldOut ? 'text-red-500' : 'text-green-500'}">${session.isSoldOut ? 'Indisponível' : 'Disponível'}</p>
+                            </div>
                         `;
-                        sessionDetails.appendChild(li);
+                        sessionDetails.innerHTML = detailsHTML;
 
                         if (!session.isSoldOut) {
                             goToTheaterDiv.classList.remove('hidden');
-                            theaterLink.href = `/theaters/${session.theater.id}/seats`;
+                            theaterLink.href = `/theaters/${session.theater.id}/seats/${session.id}`;
                         } else {
                             goToTheaterDiv.classList.add('hidden');
                         }

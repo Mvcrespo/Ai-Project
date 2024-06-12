@@ -11,15 +11,18 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
+
     public function edit(Request $request): View
     {
+        $user = $request->user();
+        $customer = $user->customer; //informações do cliente
+
         return view('profile.edit-profile', [
-            'user' => $request->user(),
+            'user' => $user,
+            'customer' => $customer,
         ]);
     }
+
     public function editPassword(Request $request): View
     {
         return view('profile.edit', [
@@ -27,15 +30,13 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
+
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
         $data = $request->validated();
 
-        // Handle file upload
+
         if ($request->hasFile('photo_file')) {
             $file = $request->file('photo_file');
             $filename = time() . '_' . $file->getClientOriginalName();
@@ -51,11 +52,19 @@ class ProfileController extends Controller
 
         $user->save();
 
+
+        if ($user->customer) {
+            $customer = $user->customer;
+            $customer->nif = $data['nif'] ?? null;
+            $customer->payment_type = $data['payment_type'] !== '' ? $data['payment_type'] : null;
+            $customer->payment_ref = $data['payment_ref'] ?? null;
+            $customer->save();
+        }
+
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
-    /**
-     * Delete the user's account.
-     */
+
+
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [

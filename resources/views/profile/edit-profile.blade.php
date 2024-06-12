@@ -23,6 +23,16 @@
                         <div class="space-y-4">
                             <x-field.input name="name" label="Name" width="full" value="{{ old('name', $user->name) }}"/>
                             <x-field.input name="email" label="Email" width="full" type="email" value="{{ old('email', $user->email) }}"/>
+                            @if ($customer)
+                                <x-field.input name="nif" label="NIF" width="full" value="{{ old('nif', $customer->nif) }}"/>
+                                <x-field.select name="payment_type" label="Payment Type" width="full" :options="[
+                                    '' => 'Select a payment type...',
+                                    'PAYPAL' => 'PayPal',
+                                    'VISA' => 'Visa',
+                                    'MBWAY' => 'MBWay'
+                                ]" :value="old('payment_type', $customer->payment_type ?? '')" />
+                                <x-field.input name="payment_ref" label="Payment Reference" width="full" value="{{ old('payment_ref', $customer->payment_ref) }}"/>
+                            @endif
                         </div>
                         <div class="flex flex-col items-center space-y-4">
                             <div class="mb-4">

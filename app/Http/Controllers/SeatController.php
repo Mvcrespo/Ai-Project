@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Seat;
 use App\Models\Theater;
+use App\Models\Screening;
 use Illuminate\Http\Request;
+use App\Models\Ticket;
+
+use Illuminate\Support\Facades\Log;
 
 class SeatController extends Controller
 {
@@ -37,10 +41,17 @@ class SeatController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Theater $theater)
+    public function show(Theater $theater, Screening $screening)
     {
-        $seats = Seat::where('theater_id', $theater->id)->with('tickets')->get();
-        return view('seats.show', compact('theater', 'seats'));
+        $seats = Seat::where('theater_id', $theater->id)
+            ->with(['tickets' => function ($query) use ($screening) {
+                $query->where('screening_id', $screening->id);
+            }])
+            ->get();
+
+        $movieTitle = $screening->movie->title; // Assumindo que a relação está configurada corretamente
+
+        return view('seats.show', compact('theater', 'seats', 'screening', 'movieTitle'));
     }
 
     /**
@@ -66,4 +77,40 @@ class SeatController extends Controller
     {
         //
     }
+
+    /**
+     * Get ticket details for a specific seat.
+     */
+    public function ticketDetails(Request $request, $seatId)
+    {
+        $screeningId = $request->query('screening_id');
+
+        // Executar a consulta manualmente para depuração
+        $query = Ticket::where('seat_id', $seatId)
+                       ->where('screening_id', $screeningId)
+                       ->where('status', 'valid');
+
+        $ticket = $query->first();
+
+        if ($ticket) {
+            return response()->json([
+                'id' => $ticket->id,
+                'seat_id' => $ticket->seat_id,
+                'price' => $ticket->price,
+                'status' => $ticket->status,
+                'purchase_id' => $ticket->purchase_id,
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'No ticket available for this seat',
+                'seat_id' => $seatId,
+                'screening_id' => $screeningId,
+                'query' => $query->toSql(),
+                'bindings' => $query->getBindings()
+            ], 404);
+        }
+    }
+
+
+
 }
