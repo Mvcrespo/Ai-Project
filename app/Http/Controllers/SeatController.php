@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Seat;
+use App\Models\Theater;
 use Illuminate\Http\Request;
 
 class SeatController extends Controller
@@ -12,7 +13,9 @@ class SeatController extends Controller
      */
     public function index()
     {
-        //
+        // Exemplo de como listar todos os assentos
+        $seats = Seat::all();
+        return view('seats.index', compact('seats'));
     }
 
     /**
@@ -34,9 +37,10 @@ class SeatController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Seat $seat)
+    public function show(Theater $theater)
     {
-        //
+        $seats = Seat::where('theater_id', $theater->id)->with('tickets')->get();
+        return view('seats.show', compact('theater', 'seats'));
     }
 
     /**

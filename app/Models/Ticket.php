@@ -40,4 +40,10 @@ class Ticket extends Model
         return $this->belongsTo(Seat::class())->withTrashed();
 
     }
+
+    // Método para verificar se o ticket está disponível
+    public function isAvailable()
+    {
+        return $this->status === 'valid';
+    }
 }

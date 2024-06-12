@@ -15,7 +15,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Log;
 
-
 class RegisteredUserController extends Controller
 {
     /**
@@ -46,15 +45,15 @@ class RegisteredUserController extends Controller
                 'password' => Hash::make($request->password),
                 'type' => 'C'
             ]);
-            Customer::create(['id'=>$user->id]);
+            Customer::create(['id' => $user->id]);
             return $user;
         });
 
-
+        // Fire the Registered event with the user object
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect(route('verification.notice', absolute: false));
     }
 }

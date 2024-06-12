@@ -44,9 +44,12 @@
                         <option value="">Escolha a Hora</option>
                     </select>
                 </div>
-                <ul id="session-details" class="list-disc list-inside">
+                <ul id="session-details" class="list-disc list-inside mb-4">
                     <!-- Session details will be populated here -->
                 </ul>
+                <div id="go-to-theater" class="hidden">
+                    <a href="#" id="theater-link" class="inline-block px-6 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">Ir para os Assentos</a>
+                </div>
             @else
                 <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200 mt-6">Sessões</h2>
                 <p class="text-gray-700 dark:text-gray-300">Nenhuma data disponível.</p>
@@ -59,6 +62,8 @@
             const dateSelect = document.getElementById('date-select');
             const timeSelect = document.getElementById('time-select');
             const sessionDetails = document.getElementById('session-details');
+            const goToTheaterDiv = document.getElementById('go-to-theater');
+            const theaterLink = document.getElementById('theater-link');
 
             const sessions = @json($movie->screenings);
 
@@ -78,6 +83,7 @@
                 } else {
                     timeSelect.disabled = true;
                     sessionDetails.innerHTML = '';
+                    goToTheaterDiv.classList.add('hidden');
                 }
             });
 
@@ -100,6 +106,13 @@
                             <span class="font-semibold">${session.isSoldOut ? 'Indisponível' : 'Disponível'}</span>
                         `;
                         sessionDetails.appendChild(li);
+
+                        if (!session.isSoldOut) {
+                            goToTheaterDiv.classList.remove('hidden');
+                            theaterLink.href = `/theaters/${session.theater.id}/seats`;
+                        } else {
+                            goToTheaterDiv.classList.add('hidden');
+                        }
                     }
                 }
             });

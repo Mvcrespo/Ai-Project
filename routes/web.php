@@ -7,19 +7,12 @@ use App\Http\Controllers\MovieController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\TheaterController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SeatController;
 
 
 // Definir a rota inicial para redirecionar para movies.high
 Route::get('/', [MovieController::class, 'high'])->name('movies.high');
 
-
-// Grupo de rotas que requerem autenticação
-Route::middleware('auth')->group(function () {
-    Route::get('/password', [ProfileController::class, 'editPassword'])->name('profile.edit.password');
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-});
-Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
 // Autenticação padrão do Laravel
 require __DIR__ . '/auth.php';
@@ -45,4 +38,5 @@ Route::delete('users/{user}/destroy', [UserController::class, 'destroy'])->name(
 
 Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
 
-
+Route::resource('seats', SeatController::class);
+Route::get('theaters/{theater}/seats', [SeatController::class, 'show'])->name('theaters.seats');
