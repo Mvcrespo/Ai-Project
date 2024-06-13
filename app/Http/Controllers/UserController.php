@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends \Illuminate\Routing\Controller
 {
@@ -37,7 +38,8 @@ class UserController extends \Illuminate\Routing\Controller
             $query->whereIn('type', ['A', 'E']);
         }
 
-        $users = $query->orderBy('name')->paginate(20);
+        // Ordenar usuários de forma que os soft deletados apareçam no final
+        $users = $query->orderByRaw('deleted_at IS NOT NULL, name')->paginate(20);
 
         return view('users.index', compact('users'));
     }
@@ -58,6 +60,9 @@ class UserController extends \Illuminate\Routing\Controller
             $file->storeAs('public/photos', $filename);
             $data['photo_filename'] = $filename;
         }
+
+        // Hash the password before saving
+        $data['password'] = Hash::make($data['password']);
 
         $newUser = User::create($data);
         $url = route('users.show', ['user' => $newUser]);
@@ -107,31 +112,33 @@ class UserController extends \Illuminate\Routing\Controller
     {
         $this->authorize('delete', $user);
 
-        $user->forceDelete();
+        $user->delete(); // Soft delete
 
         $alertType = 'success';
-        $alertMsg = "User {$user->name} ({$user->id}) has been deleted permanently!";
+        $alertMsg = "User {$user->name} ({$user->id}) has been deleted!";
 
         return redirect()->route('users.index')
             ->with('alert-type', $alertType)
             ->with('alert-msg', $alertMsg);
     }
 
-    public function block($id): RedirectResponse
+    public function block(User $user): RedirectResponse
     {
-        $user = User::findOrFail($id);
-        $this->authorize('delete', $user);
+        $this->authorize('block', $user);
 
-        $user->delete(); // Soft delete
+        $user->blocked = 1;
+        $user->save();
+
         return redirect()->route('users.index')->with('success', 'User blocked successfully.');
     }
 
-    public function unblock($id): RedirectResponse
+    public function unblock(User $user): RedirectResponse
     {
-        $user = User::withTrashed()->findOrFail($id);
-        $this->authorize('restore', $user);
+        $this->authorize('unblock', $user);
 
-        $user->restore(); // Restore soft deleted user
+        $user->blocked = 0;
+        $user->save();
+
         return redirect()->route('users.index')->with('success', 'User unblocked successfully.');
     }
 }

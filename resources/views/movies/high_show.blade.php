@@ -11,7 +11,10 @@
                 <!-- Poster Image -->
                 <div class="md:flex-shrink-0 md:w-1/3">
                     <div class="p-4 bg-white rounded-lg shadow-md">
-                        <img src="{{ $movie->poster_full_url }}" alt="{{ $movie->title }} poster" class="w-full h-auto rounded-lg mb-4 md:mb-0">
+                        @php
+                            $posterUrl = $movie->poster_full_url ? $movie->poster_full_url : asset('img/default_poster.png');
+                        @endphp
+                        <img src="{{ $posterUrl}}" alt="{{ $movie->title }} poster" class="w-full h-auto rounded-lg mb-4 md:mb-0">
                     </div>
                 </div>
                 <!-- Movie Details -->

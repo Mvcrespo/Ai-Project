@@ -5,7 +5,7 @@
 @section('main')
 <div class="flex flex-col space-y-6">
     <div class="p-4 sm:p-8 bg-white dark:bg-gray-900 shadow sm:rounded-lg">
-        <div class="max-full">
+        <div class="max-w-full">
             <section>
                 <header>
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -23,6 +23,7 @@
                         <div class="space-y-4">
                             <x-field.input name="name" label="Name" width="full" value="{{ old('name', $user->name) }}"/>
                             <x-field.input name="email" label="Email" width="full" type="email" value="{{ old('email', $user->email) }}"/>
+
                             @if ($customer)
                                 <x-field.input name="nif" label="NIF" width="full" value="{{ old('nif', $customer->nif) }}"/>
                                 <x-field.select name="payment_type" label="Payment Type" width="full" :options="[
@@ -34,6 +35,7 @@
                                 <x-field.input name="payment_ref" label="Payment Reference" width="full" value="{{ old('payment_ref', $customer->payment_ref) }}"/>
                             @endif
                         </div>
+
                         <div class="flex flex-col items-center space-y-4">
                             <div class="mb-4">
                                 <label for="photo_file" class="block text-gray-700 font-bold mb-2 text-center">Profile Photo</label>
@@ -44,6 +46,7 @@
                                 <input type="file" name="photo_file" id="photo_file" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-800 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-gray-700 dark:file:text-gray-300"/>
                             </div>
                         </div>
+
                     </div>
                     <div class="flex mt-6">
                         <x-button element="submit" type="dark" text="Save" class="uppercase"/>
@@ -51,6 +54,24 @@
                                     href="{{ url()->previous() }}"/>
                     </div>
                 </form>
+
+                <div class="mt-6 flex flex-col items-center">
+                    <label class="block text-gray-700 font-bold mb-2">Email Verification Status</label>
+                    @if ($user->email_verified_at)
+                        <span class="text-green-500">Verified</span>
+                    @else
+                        <span class="text-red-500">Not Verified</span>
+                        <form method="POST" action="{{ route('verification.send') }}">
+                            @csrf
+                            <x-button element="submit" type="dark" text="Verify Email" class="mt-2"/>
+                        </form>
+                        @if (session('status') == 'verification-link-sent')
+                            <div class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
+                                {{ __('A new verification link has been sent to your email address.') }}
+                            </div>
+                        @endif
+                    @endif
+                </div>
             </section>
         </div>
     </div>

@@ -38,8 +38,12 @@ class CartController extends Controller
 
         session()->put('cart', $cart);
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Items added to Shopping Cart'
+        ]);
     }
+
 
 
     public function removeFromCart(Request $request, $seat_id, $screening_id): RedirectResponse

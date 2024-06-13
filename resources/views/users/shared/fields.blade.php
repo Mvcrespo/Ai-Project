@@ -25,11 +25,15 @@
         <x-field.input name="name" label="Name" width="full" :readonly="$readonly" value="{{ old('name', $user->name) }}"/>
         <x-field.input name="email" label="Email" width="full" type="email" :readonly="$readonly" value="{{ old('email', $user->email) }}"/>
         <x-field.radiogroup name="type" label="Type" width="full" :readonly="$readonly" value="{{ old('type', $user->type) }}" :options="$typeOptions"/>
-       
+
+        @if ($mode == 'create')
+            <x-field.input name="password" label="Password" width="full" type="password" :readonly="$readonly" value=""/>
+            <x-field.input name="password_confirmation" label="Confirm Password" width="full" type="password" :readonly="$readonly" value=""/>
+        @endif
     </div>
     <div class="flex flex-col items-center space-y-4">
         <div class="mb-4">
-        <label for="photo_file" class="block text-gray-700 font-bold mb-2 text-center">Profile Photo</label>
+            <label for="photo_file" class="block text-gray-700 font-bold mb-2 text-center">Profile Photo</label>
             @php
                 $photoUrl = $user->photo_filename ? asset('storage/photos/' . $user->photo_filename) : asset('/img/default_user.png');
             @endphp

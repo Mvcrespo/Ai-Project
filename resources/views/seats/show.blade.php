@@ -149,29 +149,8 @@
                 results.push({ success: false });
             }
         }
-
-        // Processar todos os resultados após enviar todos os pedidos
-        const successCount = results.filter(item => item.success).length;
-        const errorCount = results.length - successCount;
-
-        showMessage(`${successCount} tickets added to cart. ${errorCount} failed.`, 'success');
         selectedSeats = [];
         updateSelectedTickets();
-    }
-
-
-
-    function showMessage(message, type) {
-        const messageContainer = document.getElementById('message-container');
-        const messageElement = document.createElement('div');
-        messageElement.textContent = message;
-        messageElement.className = `p-4 rounded shadow-md text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
-        messageContainer.appendChild(messageElement);
-
-        setTimeout(() => {
-            messageContainer.removeChild(messageElement);
-            location.reload(); // Reload the page
-        }, 1400);
     }
 </script>
 @endsection

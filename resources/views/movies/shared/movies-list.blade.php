@@ -6,7 +6,12 @@
         @foreach($movies as $movie)
             <a href="{{ route('movies.high_show', $movie->id) }}" class="relative group bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg transition-transform transform hover:scale-105" style="height: 100%;">
                 <div class="p-4 bg-white dark:bg-gray-900 rounded-lg shadow-md flex flex-col justify-between h-full">
-                    <img src="{{ $movie->poster_full_url }}" alt="{{ $movie->title }}" class="rounded-lg mb-4" style="width: 100%; height: 340px; object-fit: contain;">
+                    @php
+                        $posterUrl = $movie->poster_full_url ? $movie->poster_full_url : asset('img/default_poster.png');
+                    @endphp
+                    <img src="{{ $posterUrl }}" alt="{{ $movie->title }}" class="rounded-lg mb-4" style="width: 100%; height: 340px; object-fit: contain;">
+
+
                     <div class="text-center">
                         <h4 class="font-semibold text-gray-800 dark:text-gray-200">{{ $movie->title }}</h4>
                     </div>

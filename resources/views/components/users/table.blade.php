@@ -43,7 +43,7 @@
                             <td></td>
                         @endcan
                     @endif
-                    @if($showDelete && $user->type != 'C')
+                    @if(!$user->trashed() && $showDelete && $user->type != 'C')
                         @can('delete', $user)
                             <td>
                                 <x-table.icon-delete class="px-0.5"
@@ -55,17 +55,17 @@
                     @endif
                     @if($user->type == 'C')
                         <td>
-                            @if($user->trashed())
+                            @if($user->blocked)
                                 <form method="POST" action="{{ route('users.unblock', ['user' => $user]) }}">
                                     @csrf
-                                    <button type="submit">
-                                        Unblock
+                                    <button type="submit" class="text-red-600 hover:text-red-900">
+                                        <x-table.icon-lock class="px-0.5" href="#"/>
                                     </button>
                                 </form>
                             @else
                                 <form method="POST" action="{{ route('users.block', ['user' => $user]) }}">
                                     @csrf
-                                    <button type="submit" class="text-red-600 hover:text-red-900">
+                                    <button type="submit" class="text-green-600 hover:text-green-900">
                                         <x-table.icon-lock class="px-0.5" href="#"/>
                                     </button>
                                 </form>
