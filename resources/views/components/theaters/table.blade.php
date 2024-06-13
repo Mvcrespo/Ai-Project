@@ -21,7 +21,7 @@
                 <td class="px-2 py-2 text-left">
                     @php
                         $defaultPhotoUrl = asset('photos_theaters/default_theater.png');
-                        $photoUrl = $theater->photoFullUrl ?? $defaultPhotoUrl;
+                        $photoUrl = $theater->photo_filename ? asset('storage/theaters/' . $theater->photo_filename) : $defaultPhotoUrl;
                     @endphp
                     <img src="{{ $photoUrl }}" alt="Theater Photo" width="100">
                 </td>

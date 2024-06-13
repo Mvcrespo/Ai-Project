@@ -28,14 +28,16 @@ class TheaterController extends \Illuminate\Routing\Controller
     public function create(): View
     {
         $theater = new Theater();
-        return view('theaters.create', compact('theater'));
+        $mode = 'create';
+        $readonly = false;
+        return view('theaters.create', compact('theater', 'mode', 'readonly'));
     }
 
     public function store(TheaterFormRequest $request): RedirectResponse
     {
         $newTheater = Theater::create($request->validated());
         if ($request->hasFile('photo_file')) {
-            $path = $request->file('photo_file')->storeAs('public/theaters');
+            $path = $request->file('photo_file')->store('public/theaters');
             $newTheater->photo_filename = basename($path);
             $newTheater->save();
         }
@@ -49,12 +51,16 @@ class TheaterController extends \Illuminate\Routing\Controller
 
     public function show(Theater $theater): View
     {
-        return view('theaters.show', compact('theater'));
+        $mode = 'show';
+        $readonly = true;
+        return view('theaters.show', compact('theater', 'mode', 'readonly'));
     }
 
     public function edit(Theater $theater): View
     {
-        return view('theaters.edit', compact('theater'));
+        $mode = 'edit';
+        $readonly = false;
+        return view('theaters.edit', compact('theater', 'mode', 'readonly'));
     }
 
     public function update(TheaterFormRequest $request, Theater $theater): RedirectResponse
@@ -65,7 +71,7 @@ class TheaterController extends \Illuminate\Routing\Controller
             if ($theater->photo_filename && Storage::exists('public/theaters/' . $theater->photo_filename)) {
                 Storage::delete('public/theaters/' . $theater->photo_filename);
             }
-            $path = $request->file('photo_file')->storeAs('public/theaters', basename($path));
+            $path = $request->file('photo_file')->store('public/theaters');
             $theater->photo_filename = basename($path);
             $theater->save();
         }

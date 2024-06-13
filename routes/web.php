@@ -31,7 +31,7 @@ Route::resource('movies', MovieController::class);
 Route::get('/highlighted', [MovieController::class, 'highlighted'])->name('movies.highlighted');
 Route::get('/highlighted/search', [MovieController::class, 'highlightedSearch'])->name('movies.highlighted_search');
 Route::get('/high_movie/{id}', [MovieController::class, 'high_show'])->name('movies.high_show');
-
+Route::delete('/movies/{movie}/poster', [MovieController::class, 'destroyPoster'])->name('movies.poster.destroy');
 
 Route::resource('users', UserController::class);
 Route::post('users/{user}/block', [UserController::class, 'block'])->name('users.block');

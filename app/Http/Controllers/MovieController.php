@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Storage;
 
 class MovieController extends \Illuminate\Routing\Controller
 {
@@ -33,7 +34,7 @@ class MovieController extends \Illuminate\Routing\Controller
 
     public function store(MovieFormRequest $request): RedirectResponse
     {
-        // Handle file upload
+        // Validate and handle file upload
         $data = $request->validated();
         if ($request->hasFile('poster_filename')) {
             $file = $request->file('poster_filename');
@@ -42,13 +43,16 @@ class MovieController extends \Illuminate\Routing\Controller
             $data['poster_filename'] = $filename;
         }
 
-        $newmovie = Movie::create($data);
-        $url = route('movies.show', ['movie' => $newmovie]);
-        $htmlMessage = "Movie <a href='$url'><u>{$newmovie->title}</u></a> ({$newmovie->id}) has been created successfully!";
+        // Create new movie
+        $newMovie = Movie::create($data);
+        $url = route('movies.show', ['movie' => $newMovie]);
+        $htmlMessage = "Movie <a href='$url'><u>{$newMovie->title}</u></a> ({$newMovie->id}) has been created successfully!";
+
         return redirect()->route('movies.index')
             ->with('alert-type', 'success')
             ->with('alert-msg', $htmlMessage);
     }
+
 
     public function edit(Movie $movie): View
     {
@@ -88,6 +92,33 @@ class MovieController extends \Illuminate\Routing\Controller
             ->with('alert-type', $alertType)
             ->with('alert-msg', $alertMsg);
     }
+
+    public function destroyPoster(Movie $movie): RedirectResponse
+    {
+        // Check if the movie has a poster filename
+        if ($movie->poster_filename) {
+            $filePath = 'public/posters/' . $movie->poster_filename;
+
+            // Check if the file exists in the storage
+            if (Storage::exists($filePath)) {
+                // Delete the file from the storage
+                Storage::delete($filePath);
+            }
+
+            // Update the movie's poster filename to null
+            $movie->poster_filename = null;
+            $movie->save();
+
+            return redirect()->back()
+                ->with('alert-type', 'success')
+                ->with('alert-msg', "Poster of movie {$movie->title} has been deleted.");
+        }
+
+        return redirect()->back()
+            ->with('alert-type', 'warning')
+            ->with('alert-msg', "No poster found to delete for movie {$movie->title}.");
+    }
+
 
     public function show(Movie $movie): View
     {

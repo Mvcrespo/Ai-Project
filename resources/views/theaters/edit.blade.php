@@ -35,7 +35,7 @@
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                         Edit theater "{{ $theater->name }}"
                     </h2>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-300  mb-6">
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-300 mb-6">
                         Click on "Save" button to store the information.
                     </p>
                 </header>
@@ -55,7 +55,7 @@
         </div>
     </div>
 </div>
-<form class="hidden" id="form_to_delete_photo"
+<form id="form_to_delete_photo"
     method="POST" action="{{ route('theaters.photo.destroy', ['theater' => $theater]) }}">
     @csrf
     @method('DELETE')
