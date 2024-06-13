@@ -18,6 +18,11 @@
         <x-field.input name="name" label="Name" :readonly="$readonly"
                         value="{{ old('name', $theater->name) }}"/>
     </div>
+    @php
+        $defaultPhotoUrl = asset('photos_theaters/default_theater.png');
+        $photoUrl = $theater->photoFullUrl ?? $defaultPhotoUrl;
+    @endphp
+
     <div class="pb-6">
         <x-field.image
             name="photo_file"
@@ -27,6 +32,6 @@
             deleteTitle="Delete Photo"
             :deleteAllow="($mode == 'edit') && ($theater->photo_url)"
             deleteForm="form_to_delete_photo"
-            :imageUrl="$theater->photoFullUrl"/>
+            :imageUrl="$photoUrl"/>
     </div>
 </div>

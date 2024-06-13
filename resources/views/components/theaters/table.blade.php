@@ -19,7 +19,11 @@
         @foreach ($theaters as $theater)
             <tr class="border-b border-b-gray-400 dark:border-b-gray-500">
                 <td class="px-2 py-2 text-left">
-                    <img src="{{$theater->photoFullUrl}}" alt="Theater Photo" width="100">
+                    @php
+                        $defaultPhotoUrl = asset('photos_theaters/default_theater.png');
+                        $photoUrl = $theater->photoFullUrl ?? $defaultPhotoUrl;
+                    @endphp
+                    <img src="{{ $photoUrl }}" alt="Theater Photo" width="100">
                 </td>
                 <td class="px-2 py-2 text-left">
                     {{$theater->name}}

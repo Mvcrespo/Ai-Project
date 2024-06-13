@@ -1,4 +1,4 @@
-@extends('layouts.main')
+@extends('layouts.admin')
 
 @section('header-title', 'Theater "' . $theater->name . '"')
 
@@ -61,4 +61,3 @@
     @method('DELETE')
 </form>
 @endsection
-

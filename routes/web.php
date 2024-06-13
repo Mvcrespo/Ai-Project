@@ -23,6 +23,7 @@ Route::resource('genres', GenreController::class);
 
 // Recursos de theaters
 Route::resource('theaters', TheaterController::class);
+Route::delete('/theaters/{theater}/photo', [TheaterController::class, 'destroyPhoto'])->name('theaters.photo.destroy');
 
 // Recursos de movies
 Route::resource('movies', MovieController::class);
