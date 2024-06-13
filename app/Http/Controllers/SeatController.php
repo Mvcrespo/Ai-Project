@@ -7,7 +7,7 @@ use App\Models\Theater;
 use App\Models\Screening;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
-
+use App\Models\Configuration;
 use Illuminate\Support\Facades\Log;
 
 class SeatController extends Controller
@@ -17,7 +17,6 @@ class SeatController extends Controller
      */
     public function index()
     {
-        // Exemplo de como listar todos os assentos
         $seats = Seat::all();
         return view('seats.index', compact('seats'));
     }
@@ -49,9 +48,11 @@ class SeatController extends Controller
             }])
             ->get();
 
-        $movieTitle = $screening->movie->title; // Assumindo que a relação está configurada corretamente
+        $occupiedSeats = Ticket::where('screening_id', $screening->id)->pluck('seat_id');
+        $configuration = Configuration::first();
+        $ticketPrice = $configuration->ticket_price;
 
-        return view('seats.show', compact('theater', 'seats', 'screening', 'movieTitle'));
+        return view('seats.show', compact('theater', 'seats', 'screening', 'occupiedSeats', 'ticketPrice'));
     }
 
     /**
@@ -84,33 +85,48 @@ class SeatController extends Controller
     public function ticketDetails(Request $request, $seatId)
     {
         $screeningId = $request->query('screening_id');
+        $configuration = Configuration::first();
+        $ticketPrice = $configuration ? $configuration->ticket_price : 0;
 
-        // Executar a consulta manualmente para depuração
-        $query = Ticket::where('seat_id', $seatId)
+        Log::info('Checking ticket details', ['seat_id' => $seatId, 'screening_id' => $screeningId]);
+
+        $ticket = Ticket::where('seat_id', $seatId)
                        ->where('screening_id', $screeningId)
-                       ->where('status', 'valid');
-
-        $ticket = $query->first();
+                       ->where('status', 'valid')
+                       ->whereNull('purchase_id')
+                       ->first();
 
         if ($ticket) {
+            Log::info('Ticket found', ['ticket' => $ticket]);
+
             return response()->json([
                 'id' => $ticket->id,
                 'seat_id' => $ticket->seat_id,
-                'price' => $ticket->price,
-                'status' => $ticket->status,
+                'price' => $ticketPrice, // Always use the configuration price
+                'status' => $ticket->status === 'valid' && $ticket->purchase_id === null,
                 'purchase_id' => $ticket->purchase_id,
             ]);
         } else {
+            Log::warning('No ticket available for this seat', ['seat_id' => $seatId, 'screening_id' => $screeningId]);
+
             return response()->json([
-                'error' => 'No ticket available for this seat',
+                'id' => null,
                 'seat_id' => $seatId,
-                'screening_id' => $screeningId,
-                'query' => $query->toSql(),
-                'bindings' => $query->getBindings()
-            ], 404);
+                'price' => $ticketPrice,
+                'status' => true,
+                'purchase_id' => null,
+            ]);
         }
     }
 
 
+    public function checkAvailability($screeningId)
+    {
+        $occupiedSeats = Ticket::where('screening_id', $screeningId)->pluck('seat_id');
+        $availableSeats = Seat::where('theater_id', function($query) use ($screeningId) {
+            $query->select('theater_id')->from('screenings')->where('id', $screeningId);
+        })->whereNotIn('id', $occupiedSeats)->get();
 
+        return response()->json($availableSeats);
+    }
 }

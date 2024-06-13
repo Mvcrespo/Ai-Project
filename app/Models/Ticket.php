@@ -39,7 +39,7 @@ class Ticket extends Model
 
     public function isAvailable()
     {
-        return $this->status === 'valid';
+        return $this->status === 'valid' && $this->purchase_id === null;
     }
 }
 

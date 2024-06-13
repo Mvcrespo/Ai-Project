@@ -18,57 +18,42 @@ class CartController extends Controller
         return view('cart.show', compact('cart'));
     }
 
-    public function addToCart(Request $request, Ticket $ticket)
+    public function addToCart(Request $request)
     {
-        try {
-            $cart = session('cart', collect());
-            if ($cart->firstWhere('id', $ticket->id)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ticket is already in the cart.'
-                ]);
-            } else {
-                $cart->push($ticket);
-                session(['cart' => $cart]);
-            }
+        $seatId = $request->input('seat_id');
+        $screeningId = $request->input('screening_id');
+        $movieTitle = $request->input('movie_title');
+        $seat = $request->input('seat');
+        $price = $request->input('price');
 
-            return response()->json([
-                'success' => true,
-                'total' => $cart->count()
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Failed to add ticket to cart', ['error' => $e->getMessage()]);
+        $cart = session()->get('cart', collect());
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to add ticket to cart.'
-            ], 500);
-        }
+        $cart->push([
+            'seat_id' => $seatId,
+            'screening_id' => $screeningId,
+            'movie_title' => $movieTitle,
+            'seat' => $seat,
+            'price' => $price,
+        ]);
+
+        session()->put('cart', $cart);
+
+        return response()->json(['success' => true]);
     }
 
-    public function removeFromCart(Request $request, Ticket $ticket): RedirectResponse
+
+    public function removeFromCart(Request $request, $seat_id, $screening_id): RedirectResponse
     {
-        $url = route('cart.show', ['ticket' => $ticket]);
         $cart = session('cart', collect());
-        if (!$cart->contains('id', $ticket->id)) {
-            $alertType = 'warning';
-            $htmlMessage = "Ticket <a href='$url'>#{$ticket->id}</a>
-                <strong>\"Seat {$ticket->seat->seat_number}\"</strong> was not removed from the cart because it is not in the cart!";
-            return back()
-                ->with('alert-msg', $htmlMessage)
-                ->with('alert-type', $alertType);
-        } else {
-            $cart = $cart->filter(function ($item) use ($ticket) {
-                return $item->id !== $ticket->id;
-            });
-            session(['cart' => $cart]);
-            $alertType = 'success';
-            $htmlMessage = "Ticket <a href='$url'>#{$ticket->id}</a>
-                <strong>\"Seat {$ticket->seat->seat_number}\"</strong> was removed from the cart.";
-            return back()
-                ->with('alert-msg', $htmlMessage)
-                ->with('alert-type', $alertType);
-        }
+        $cart = $cart->filter(function ($item) use ($seat_id, $screening_id) {
+            return !($item['seat_id'] == $seat_id && $item['screening_id'] == $screening_id);
+        });
+
+        session(['cart' => $cart]);
+
+        return back()
+            ->with('alert-type', 'success')
+            ->with('alert-msg', 'Item removed from cart');
     }
 
     public function destroy(Request $request): RedirectResponse
@@ -106,16 +91,16 @@ class CartController extends Controller
                     ->with('alert-msg', "Payment failed. Please try again.");
             }
 
-            $insertTickets = [];
-            foreach ($cart as $ticket) {
-                $insertTickets[$ticket->id] = [
-                    "ticket_id" => $ticket->id,
-                    "status" => 'confirmed',
-                ];
-            }
-
-            DB::transaction(function () use ($customer, $insertTickets) {
-                $customer->tickets()->attach($insertTickets);
+            DB::transaction(function () use ($customer, $cart) {
+                foreach ($cart as $item) {
+                    Ticket::create([
+                        'screening_id' => $item['screening_id'],
+                        'seat_id' => $item['seat_id'],
+                        'purchase_id' => null, // Será atualizado quando a compra for finalizada
+                        'price' => $item['price'],
+                        'status' => 'valid'
+                    ]);
+                }
             });
 
             $request->session()->forget('cart');
@@ -131,4 +116,3 @@ class CartController extends Controller
         return response()->json(['total' => $cart->count()]);
     }
 }
-

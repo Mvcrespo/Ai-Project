@@ -9,6 +9,7 @@ use App\Http\Controllers\TheaterController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SeatController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\PurchaseController;
 
 // Definir a rota inicial para redirecionar para movies.high
 Route::get('/', [MovieController::class, 'high'])->name('movies.high');
@@ -42,12 +43,15 @@ Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
 Route::resource('seats', SeatController::class);
 Route::get('/theaters/{theater}/seats/{screening}', [SeatController::class, 'show']);
 Route::get('/seats/{seat}/ticket-details', [SeatController::class, 'ticketDetails']);
-
+Route::get('/seats/check-availability/{screeningId}', [SeatController::class, 'checkAvailability']);
 
 
 Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
-Route::post('/cart/add/{ticket}', [CartController::class, 'addToCart'])->name('cart.add');
-Route::delete('/cart/remove/{ticket}', [CartController::class, 'removeFromCart'])->name('cart.remove');
+Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
+Route::delete('/cart/remove/{seat_id}/{screening_id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'destroy'])->name('cart.clear');
 Route::post('/cart/confirm', [CartController::class, 'confirm'])->name('cart.confirm');
 Route::get('/cart/total', [CartController::class, 'getCartTotal'])->name('cart.total');
+
+
+Route::post('/purchase', [PurchaseController::class, 'store'])->name('purchase.store');

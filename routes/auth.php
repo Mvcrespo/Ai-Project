@@ -53,7 +53,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
-    Route::put('password', [ProfileController::class, 'editPassword'])->name('profile.edit.password');
+    Route::get('password', [ProfileController::class, 'editPassword'])->name('profile.edit.password');
+
+    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
 

@@ -32,16 +32,17 @@
                                 @endfor
                                 @foreach ($rowSeats as $index => $seat)
                                     @php
-                                        $ticket = $seat->tickets->first();
-                                        $isAvailable = $ticket && $ticket->isAvailable();
+                                        $isAvailable = !$occupiedSeats->contains($seat->id);
                                     @endphp
-                                    <div id="seat-{{ $seat->id }}" class="relative w-12 h-12 mx-1 cursor-pointer seat-item" onclick="showTicketDetails({{ $seat->id }}, {{ $screening->id }}, '{{ $row }}', {{ $seat->seat_number }})">
+                                    <div id="seat-{{ $seat->id }}" class="relative w-12 h-12 mx-1 seat-item {{ $isAvailable ? 'cursor-pointer' : 'cursor-not-allowed' }}" onclick="{{ $isAvailable ? "toggleSeatSelection({$seat->id}, '{$row}', {$seat->seat_number}, '{$screening->movie->title}', {$ticketPrice})" : '' }}">
                                         <img src="{{ asset($isAvailable ? 'icons/seat-available.png' : 'icons/seat-unavailable.png') }}"
                                              alt="{{ $isAvailable ? 'Available Seat' : 'Unavailable Seat' }}"
                                              class="w-full h-full">
-                                        <span class="absolute inset-0 flex items-center justify-center text-white font-bold seat-number">
-                                            {{ $seat->seat_number }}
-                                        </span>
+                                        @if ($isAvailable)
+                                            <span class="absolute inset-0 flex items-center justify-center text-white font-bold seat-number">
+                                                {{ $seat->seat_number }}
+                                            </span>
+                                        @endif
                                     </div>
                                     @if ($index == 1 || $index == $totalSeats - 3)
                                         <div class="w-8 h-8 mx-1"></div> <!-- Corredor -->
@@ -68,67 +69,97 @@
             </div>
         </div>
     </div>
-    <div id="ticket-details" class="flex-1 p-4 bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-50 rounded shadow-sm mt-4 w-full max-w-md">
-        <!-- Bilhete -->
+    <div id="selected-tickets" class="flex-1 p-4 bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-50 rounded shadow-sm mt-4 w-full max-w-md">
+        <!-- Lista de Tickets Selecionados -->
+    </div>
+    <div class="mt-4">
+        <button id="add-all-to-cart" class="px-4 py-2 bg-blue-500 text-white rounded hidden" onclick="addAllToCart()">Add All to Cart</button>
     </div>
 </div>
 <script>
-    function showTicketDetails(seatId, screeningId, row, seatNumber) {
-        fetch(`/seats/${seatId}/ticket-details?screening_id=${screeningId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    document.getElementById('ticket-details').innerHTML = `<p>${data.error}</p>`;
-                } else {
-                    document.getElementById('ticket-details').innerHTML = `
-                        <!-- Bilhete -->
-                        <div class="p-4 bg-white dark:bg-gray-900 rounded shadow-md">
-                            <p class="text-lg font-bold mb-2">Ticket Details</p>
-                            <p><strong>Ticket ID:</strong> ${data.id}</p>
-                            <p><strong>Seat:</strong> ${row}${seatNumber}</p>
-                            <p><strong>Price:</strong> ${data.price} $</p>
-                            <p><strong>Status:</strong> <span style="color: ${data.status ? 'green' : 'red'};">${data.status ? 'Available Seat' : 'Unavailable Seat'}</span></p>
-                            <p><strong>Purchase ID:</strong> ${data.purchase_id}</p>
-                            ${data.status ? '<button class="mt-4 px-4 py-2 bg-blue-500 text-white rounded" onclick="addToCart(' + data.id + ')">Add to Cart</button>' : ''}
-                        </div>
-                    `;
-                }
-                // Highlight the selected seat
-                document.querySelectorAll('.seat-item').forEach(el => {
-                    el.classList.remove('text-3xl');
-                    el.querySelector('.seat-number').classList.remove('text-3xl');
-                });
-                const selectedSeat = document.getElementById(`seat-${seatId}`);
-                selectedSeat.querySelector('.seat-number').classList.add('text-3xl');
-            });
+    let selectedSeats = [];
+
+    function toggleSeatSelection(seatId, row, seatNumber, movieTitle, price) {
+        const seatIndex = selectedSeats.findIndex(seat => seat.seatId === seatId);
+        if (seatIndex === -1) {
+            selectedSeats.push({ seatId, row, seatNumber, movieTitle, price });
+        } else {
+            selectedSeats.splice(seatIndex, 1);
+        }
+        updateSelectedTickets();
     }
 
-    function addToCart(seatId) {
-        fetch(`/cart/add/${seatId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                showMessage('Ticket added to cart', 'success');
-            } else {
-                showMessage('Ticket could not be added to cart: ' + data.message, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showMessage('An unexpected error occurred.', 'error');
+    function updateSelectedTickets() {
+        const selectedTicketsDiv = document.getElementById('selected-tickets');
+        const allSeatElements = document.querySelectorAll('.seat-item');
+
+        allSeatElements.forEach(el => {
+            el.querySelector('.seat-number')?.classList.remove('text-3xl');
         });
+
+        if (selectedSeats.length === 0) {
+            selectedTicketsDiv.innerHTML = '<p>No seats selected.</p>';
+            document.getElementById('add-all-to-cart').classList.add('hidden');
+        } else {
+            const ticketsHtml = selectedSeats.map(seat => {
+                document.getElementById(`seat-${seat.seatId}`).querySelector('.seat-number').classList.add('text-3xl');
+                return `
+                    <div class="p-4 bg-white dark:bg-gray-900 rounded shadow-md mb-2">
+                        <p><strong>Seat:</strong> ${seat.row}${seat.seatNumber}</p>
+                        <p><strong>Movie:</strong> ${seat.movieTitle}</p>
+                        <p><strong>Price:</strong> ${seat.price} $</p>
+                    </div>
+                `;
+            }).join('');
+            selectedTicketsDiv.innerHTML = ticketsHtml;
+            document.getElementById('add-all-to-cart').classList.remove('hidden');
+        }
     }
+
+    async function addAllToCart() {
+        const results = [];
+
+        for (const seat of selectedSeats) {
+            const payload = {
+                seat_id: seat.seatId,
+                screening_id: {{ $screening->id }},
+                movie_title: seat.movieTitle,
+                seat: seat.row + seat.seatNumber,
+                price: seat.price
+            };
+
+            try {
+                const response = await fetch(`/cart/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                results.push(data);
+            } catch (error) {
+                console.error('Error:', error);
+                results.push({ success: false });
+            }
+        }
+
+        // Processar todos os resultados após enviar todos os pedidos
+        const successCount = results.filter(item => item.success).length;
+        const errorCount = results.length - successCount;
+
+        showMessage(`${successCount} tickets added to cart. ${errorCount} failed.`, 'success');
+        selectedSeats = [];
+        updateSelectedTickets();
+    }
+
+
 
     function showMessage(message, type) {
         const messageContainer = document.getElementById('message-container');

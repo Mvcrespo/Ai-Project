@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Configuration extends Model
 {
     use HasFactory;
+
     public $timestamp = false;
+
+    protected $table = 'configuration';
+
     protected $fillable=['ticket_price','registered_customer_ticket_discount'];
 }
