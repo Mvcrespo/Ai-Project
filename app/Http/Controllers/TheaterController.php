@@ -35,7 +35,7 @@ class TheaterController extends \Illuminate\Routing\Controller
     {
         $newTheater = Theater::create($request->validated());
         if ($request->hasFile('photo_file')) {
-            $path = $request->file('photo_file')->store('public/theaters');
+            $path = $request->file('photo_file')->storeAs('public/theaters');
             $newTheater->photo_filename = basename($path);
             $newTheater->save();
         }
@@ -65,7 +65,7 @@ class TheaterController extends \Illuminate\Routing\Controller
             if ($theater->photo_filename && Storage::exists('public/theaters/' . $theater->photo_filename)) {
                 Storage::delete('public/theaters/' . $theater->photo_filename);
             }
-            $path = $request->file('photo_file')->store('public/theaters');
+            $path = $request->file('photo_file')->storeAs('public/theaters', basename($path));
             $theater->photo_filename = basename($path);
             $theater->save();
         }

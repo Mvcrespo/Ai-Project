@@ -53,3 +53,35 @@
         </div>
     </div>
 </header>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const themeToggleCheckbox = document.getElementById('light-switch');
+        const htmlElement = document.documentElement;
+        const userTheme = localStorage.getItem('theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        const updateTheme = (theme) => {
+            if (theme === 'dark' || (!theme && systemTheme)) {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggleCheckbox.checked = true;
+            } else {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeToggleCheckbox.checked = false;
+            }
+        };
+
+        // Inicializa o tema
+        updateTheme(userTheme);
+
+        // Adiciona evento de clique no botão
+        themeToggleCheckbox.addEventListener('change', () => {
+            if (themeToggleCheckbox.checked) {
+                updateTheme('dark');
+            } else {
+                updateTheme('light');
+            }
+        });
+    });
+</script>

@@ -69,6 +69,12 @@
                                         selectable="0"
                                         href="{{ route('profile.edit') }}"/>
                                 @endif
+                                @if(Auth::user()->type == 'A')
+                                <x-menus.submenu-item
+                                    content="DashBoard"
+                                    selectable="0"
+                                    href="{{ route('users.index') }}"/>
+                                @endif
                                 <x-menus.submenu-item
                                     content="Change Password"
                                     selectable="0"
@@ -164,6 +170,36 @@
             }, 60000); // Update every minute
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const htmlElement = document.documentElement;
+            const userTheme = localStorage.getItem('theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            const updateTheme = (theme) => {
+                if (theme === 'dark' || (!theme && systemTheme)) {
+                    htmlElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    htmlElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                }
+            };
+
+            // Inicializa o tema
+            updateTheme(userTheme);
+
+            // Adiciona evento de clique no botão
+            themeToggleBtn.addEventListener('click', () => {
+                if (htmlElement.classList.contains('dark')) {
+                    updateTheme('light');
+                } else {
+                    updateTheme('dark');
+                }
+            });
+        });
+        </script>
 </body>
 
 </html>
