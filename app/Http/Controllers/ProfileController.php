@@ -44,7 +44,6 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-
         $data = $request->validated();
 
         // Handle file upload

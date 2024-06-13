@@ -37,8 +37,6 @@ Route::post('users/{user}/block', [UserController::class, 'block'])->name('users
 Route::post('users/{user}/unblock', [UserController::class, 'unblock'])->name('users.unblock');
 Route::delete('users/{user}/destroy', [UserController::class, 'destroy'])->name('users.destroy');
 
-Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
-
 
 Route::resource('seats', SeatController::class);
 Route::get('/theaters/{theater}/seats/{screening}', [SeatController::class, 'show']);
@@ -50,8 +48,8 @@ Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
 Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
 Route::delete('/cart/remove/{seat_id}/{screening_id}', [CartController::class, 'removeFromCart'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'destroy'])->name('cart.clear');
-Route::post('/cart/confirm', [CartController::class, 'confirm'])->name('cart.confirm');
 Route::get('/cart/total', [CartController::class, 'getCartTotal'])->name('cart.total');
 
 
 Route::post('/purchase', [PurchaseController::class, 'store'])->name('purchase.store');
+

@@ -1,4 +1,4 @@
-@extends('layouts.main')
+@extends('layouts.admin')
 
 @section('header-title', $user->name)
 
@@ -8,7 +8,7 @@
         <div class="max-full">
             <section>
                 <div class="flex flex-wrap justify-end items-center gap-4 mb-4">
-                    @can('create', App\Models\user::class)
+                    @can('create', App\Models\User::class)
                     <x-button
                         href="{{ route('users.create') }}"
                         text="New"
@@ -40,7 +40,7 @@
                     </p>
                 </header>
 
-                <form method="POST" action="{{ route('users.update', ['user' => $user]) }}">
+                <form method="POST" action="{{ route('users.update', ['user' => $user]) }}" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="mt-6 space-y-4">
@@ -57,4 +57,3 @@
     </div>
 </div>
 @endsection
-

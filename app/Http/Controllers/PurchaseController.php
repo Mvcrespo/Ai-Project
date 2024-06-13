@@ -4,10 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Purchase;
 use App\Models\Ticket;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\PaymentSimulation;
+use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\ProfileUpdateRequest;
 use App\Services\Payment;
+use Carbon\Carbon;
 
 class PurchaseController extends Controller
 {
@@ -16,6 +21,12 @@ class PurchaseController extends Controller
      */
     public function store(Request $request)
     {
+        $cart = collect(session()->get('cart', [])); // Certifique-se de que o carrinho é uma coleção
+        if ($cart->isEmpty()) {
+            return back()->withErrors(['cart' => 'The cart is empty.']);
+        }
+
+        // Validar os campos gerais
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -24,25 +35,44 @@ class PurchaseController extends Controller
             'payment_reference' => 'required|string|max:255',
         ]);
 
-        $cart = session()->get('cart', []);
-        if (empty($cart)) {
-            return back()->withErrors(['cart' => 'The cart is empty.']);
+        // Validar o pagamento
+        $paymentSuccess = $this->validatePayment($request);
+
+        if (!$paymentSuccess) {
+            return back()->with('alert-type', 'payment')->with('alert-msg', 'Payment validation failed. Please check your payment details and try again.');
         }
 
-        // Process the payment
-        $paymentSuccessful = Payment::process($request->payment_type, $request->payment_reference);
-
-        if (!$paymentSuccessful) {
-            return back()->withErrors(['payment' => 'Payment could not be processed. Please try again.']);
+        // Verificar se o horário do filme permite a compra
+        $now = Carbon::now();
+        foreach ($cart as $cartItem) {
+            $screeningTime = Carbon::parse(\App\Models\Screening::find($cartItem['screening_id'])->start_time);
+            if ($now->greaterThanOrEqualTo($screeningTime->subMinutes(5))) {
+                return back()->with('alert-type', 'time')->with('alert-msg', 'Tickets can only be purchased up to 5 minutes before the movie starts.');
+            }
         }
 
-        // If payment is successful, finalize the purchase
-        DB::transaction(function () use ($request, $cart) {
-            $totalPrice = array_sum(array_column($cart, 'price'));
+        // Inicializar o desconto
+        $discount = 0;
+
+        // Aplicar desconto se o usuário estiver autenticado
+        if (Auth::check()) {
+            $configuration = \App\Models\Configuration::first();
+            if ($configuration) {
+                $discount = $configuration->registered_customer_ticket_discount;
+            }
+        }
+
+        // Se o pagamento for bem-sucedido, finalize a compra
+        DB::transaction(function () use ($request, $cart, $discount) {
+            // Calcular o preço total com desconto
+            $totalFinalPrice = $cart->sum(function ($item) use ($discount) {
+                return $item['price'] - $discount;
+            });
+
             $purchase = Purchase::create([
                 'customer_id' => Auth::id(),
                 'date' => now(),
-                'total_price' => $totalPrice,
+                'total_price' => $totalFinalPrice,
                 'customer_name' => $request->name,
                 'customer_email' => $request->email,
                 'nif' => $request->nif,
@@ -51,11 +81,12 @@ class PurchaseController extends Controller
             ]);
 
             foreach ($cart as $cartItem) {
+                $finalPrice = $cartItem['price'] - $discount;
                 Ticket::create([
                     'screening_id' => $cartItem['screening_id'],
                     'seat_id' => $cartItem['seat_id'],
                     'purchase_id' => $purchase->id,
-                    'price' => $cartItem['price'],
+                    'price' => $finalPrice,
                     'status' => 'valid',
                 ]);
             }
@@ -64,7 +95,27 @@ class PurchaseController extends Controller
             session()->forget('cart');
         });
 
-        return redirect()->route('purchases.index')->with('success', 'Purchase completed successfully!');
+        return redirect()->route('movies.high')->with('alert-type', 'success')->with('alert-msg', 'Purchase completed successfully!');
+    }
+
+    /**
+     * Validate payment details based on payment type.
+     */
+    protected function validatePayment(Request $request): bool
+    {
+        switch ($request->input('payment_type')) {
+            case 'VISA':
+                return Payment::payWithVisa($request->input('payment_reference'), $request->input('cvv'));
+
+            case 'PAYPAL':
+                return Payment::payWithPaypal($request->input('payment_reference'));
+
+            case 'MBWAY':
+                return Payment::payWithMBway($request->input('payment_reference'));
+
+            default:
+                return false;
+        }
     }
 
     /**

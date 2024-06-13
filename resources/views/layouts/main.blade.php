@@ -63,11 +63,12 @@
                                 </x-slot>
 
                                 <hr>
+                                @if(Auth::user()->type !== 'E')
                                     <x-menus.submenu-item
                                         content="Profile"
                                         selectable="0"
                                         href="{{ route('profile.edit') }}"/>
-
+                                @endif
                                 <x-menus.submenu-item
                                     content="Change Password"
                                     selectable="0"

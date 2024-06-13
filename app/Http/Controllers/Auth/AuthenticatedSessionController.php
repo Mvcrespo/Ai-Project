@@ -26,6 +26,15 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // Verificar se o usuário está bloqueado
+        $user = Auth::user();
+        if ($user->blocked) {
+            Auth::logout();
+
+            return redirect()->route('login')
+                ->withErrors(['email' => 'Your account has been blocked.']);
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('movies.high', absolute: false));
@@ -45,3 +54,4 @@ class AuthenticatedSessionController extends Controller
         return redirect('/');
     }
 }
+

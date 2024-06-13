@@ -4,15 +4,14 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Services\Payment;
 
 class ProfileUpdateRequest extends FormRequest
 {
-
     public function authorize(): bool
     {
         return true;
     }
-
 
     public function rules(): array
     {
@@ -25,20 +24,32 @@ class ProfileUpdateRequest extends FormRequest
             'photo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
 
-        // Adicionar regras condicionais para payment_ref
+        // Adicionar regras condicionais para payment_ref usando o serviÃ§o de pagamento
+        $paymentRef = $this->input('payment_ref');
         if ($this->input('payment_type') === 'VISA') {
-            $rules['payment_ref'] = 'required|digits:16';
+            $rules['payment_ref'] = ['required', 'digits:16', function ($attribute, $value, $fail) use ($paymentRef) {
+                if (!Payment::payWithVisa($paymentRef, '123')) { // '123' is a placeholder for CVV which is not checked here
+                    $fail('The payment reference is not valid for VISA.');
+                }
+            }];
         } elseif ($this->input('payment_type') === 'PAYPAL') {
-            $rules['payment_ref'] = 'required|email|max:255';
+            $rules['payment_ref'] = ['required', 'email', 'max:255', function ($attribute, $value, $fail) use ($paymentRef) {
+                if (!Payment::payWithPaypal($paymentRef)) {
+                    $fail('The payment reference is not valid for PAYPAL.');
+                }
+            }];
         } elseif ($this->input('payment_type') === 'MBWAY') {
-            $rules['payment_ref'] = 'required|regex:/^9\d{8}$/';
+            $rules['payment_ref'] = ['required', 'regex:/^9\d{8}$/', function ($attribute, $value, $fail) use ($paymentRef) {
+                if (!Payment::payWithMBway($paymentRef)) {
+                    $fail('The payment reference is not valid for MBWAY.');
+                }
+            }];
         } elseif ($this->input('payment_type') === null) {
             $rules['payment_ref'] = 'prohibited';
         }
 
         return $rules;
     }
-
 
     public function messages(): array
     {

@@ -73,7 +73,11 @@
         <!-- Lista de Tickets Selecionados -->
     </div>
     <div class="mt-4">
-        <button id="add-all-to-cart" class="px-4 py-2 bg-blue-500 text-white rounded hidden" onclick="addAllToCart()">Add All to Cart</button>
+        <form id="add-to-cart-form" action="{{ route('cart.add') }}" method="post" class="mt-4">
+            @csrf
+            <div id="form-container"></div>
+            <x-button element="submit" type="dark" text="Add All to Cart"/>
+        </form>
     </div>
 </div>
 <script>
@@ -116,41 +120,24 @@
         }
     }
 
-    async function addAllToCart() {
-        const results = [];
+    document.getElementById('add-to-cart-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Evitar envio do formulário
 
-        for (const seat of selectedSeats) {
-            const payload = {
-                seat_id: seat.seatId,
-                screening_id: {{ $screening->id }},
-                movie_title: seat.movieTitle,
-                seat: seat.row + seat.seatNumber,
-                price: seat.price
-            };
+        const formContainer = document.getElementById('form-container');
+        formContainer.innerHTML = ''; // Limpar campos anteriores
 
-            try {
-                const response = await fetch(`/cart/add`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify(payload)
-                });
+        selectedSeats.forEach(seat => {
+            formContainer.innerHTML += `
+                <input type="hidden" name="seat_id[]" value="${seat.seatId}">
+                <input type="hidden" name="screening_id[]" value="{{ $screening->id }}">
+                <input type="hidden" name="movie_title[]" value="${seat.movieTitle}">
+                <input type="hidden" name="seat[]" value="${seat.row}${seat.seatNumber}">
+                <input type="hidden" name="price[]" value="${seat.price}">
+            `;
+        });
 
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const data = await response.json();
-                results.push(data);
-            } catch (error) {
-                console.error('Error:', error);
-                results.push({ success: false });
-            }
-        }
-        selectedSeats = [];
-        updateSelectedTickets();
-    }
+        // Enviar o formulário
+        event.target.submit();
+    });
 </script>
 @endsection
