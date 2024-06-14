@@ -10,6 +10,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SeatController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\ScreeningController;
+
 
 // Definir a rota inicial para redirecionar para movies.high
 Route::get('/', [MovieController::class, 'high'])->name('movies.high');
@@ -52,5 +55,13 @@ Route::post('/cart/clear', [CartController::class, 'destroy'])->name('cart.clear
 Route::get('/cart/total', [CartController::class, 'getCartTotal'])->name('cart.total');
 
 
+Route::resource('purchases', PurchaseController::class);
+Route::get('/purchases', [PurchaseController::class, 'index'])->name('purchases.index');
+Route::get('/purchases/{purchase}', [PurchaseController::class, 'show'])->name('purchases.show');
 Route::post('/purchase', [PurchaseController::class, 'store'])->name('purchase.store');
+Route::get('/purchases/{purchase}/download', [PurchaseController::class, 'download'])->name('purchase.download');
 
+
+Route::get('tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
+
+Route::resource('screenings', ScreeningController::class);

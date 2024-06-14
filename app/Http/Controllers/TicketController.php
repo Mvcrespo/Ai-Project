@@ -34,9 +34,11 @@ class TicketController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Ticket $ticket)
+    public function show($id)
     {
-        //
+        $ticket = Ticket::with(['screening.movie', 'screening.theater', 'seat', 'purchase.customer'])->findOrFail($id);
+
+        return view('tickets.show', compact('ticket'));
     }
 
     /**

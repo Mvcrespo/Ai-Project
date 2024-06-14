@@ -6,7 +6,19 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="space-y-4">
         <x-field.input name="title" label="Title" width="full" :readonly="$readonly" value="{{ old('title', $movie->title) }}"/>
-        <x-field.input name="genre_code" label="Genre Code" width="full" :readonly="$readonly" value="{{ old('genre_code', $movie->genre_code) }}"/>
+
+        <!-- Dropdown para Genre Code -->
+        <div>
+            <label for="genre_code" class="block text-gray-700 font-bold mb-2">Genre</label>
+            <select name="genre_code" id="genre_code" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-800 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" {{ $readonly ? 'disabled' : '' }}>
+                @foreach($genres as $genre)
+                    <option value="{{ $genre->code }}" {{ old('genre_code', $movie->genre_code) == $genre->code ? 'selected' : '' }}>
+                        {{ $genre->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
         <x-field.input name="year" label="Year" width="full" type="number" :readonly="$readonly" value="{{ old('year', $movie->year) }}"/>
         <x-field.text-area name="synopsis" label="Synopsis" width="full" height="lg" :readonly="$readonly" value="{{ old('synopsis', $movie->synopsis) }}"/>
         <x-field.input name="trailer_url" label="Trailer URL" width="full" :readonly="$readonly" value="{{ old('trailer_url', $movie->trailer_url) }}"/>

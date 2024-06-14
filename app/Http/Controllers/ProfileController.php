@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -16,7 +17,14 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        $user = $request->user();
+        $user = User::with([
+            'purchases' => function($query) {
+                $query->orderBy('created_at', 'desc');
+            },
+            'purchases.tickets.screening.movie',
+            'purchases.tickets.seat',
+            'purchases.tickets.screening.theater'
+        ])->findOrFail(Auth::id());
 
         // Verificar se o usuário é do tipo 'A' (admin) ou 'C' (customer)
         if ($user->type !== 'A' && $user->type !== 'C') {

@@ -13,9 +13,44 @@ use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Services\Payment;
 use Carbon\Carbon;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PurchaseReceiptMail;
+use Illuminate\Support\Facades\Log;
 
-class PurchaseController extends Controller
+class PurchaseController extends \Illuminate\Routing\Controller
 {
+    use AuthorizesRequests;
+
+    public function __construct()
+    {
+        $this->authorizeResource(Purchase::class, 'purchase', ['except' => ['store']]);
+    }
+
+    public function index(Request $request)
+    {
+        $query = Purchase::query();
+
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('customer_name', 'like', "%{$search}%")
+                  ->orWhere('id', 'like', "%{$search}%");
+        }
+
+        $purchases = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+
+        return view('purchases.index', compact('purchases'));
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Purchase $purchase)
+    {
+        return view('purchases.show', compact('purchase'));
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -98,15 +133,24 @@ class PurchaseController extends Controller
                 ]);
             }
 
-            // Clear the cart
+            // Gera o PDF e salva no diretório storage/app/pdf_purchases
+            $pdf = PDF::loadView('purchases.receipt', compact('purchase'));
+            $pdfFilename = 'receipt_' . $purchase->id . '.pdf';
+            $pdfPath = storage_path('app/pdf_purchases/' . $pdfFilename);
+            $pdf->save($pdfPath);
+
+            // Atualiza a entrada de compra com o nome do arquivo PDF
+            $purchase->update(['receipt_pdf_filename' => $pdfFilename]);
+
+            // Envia o email com o recibo em anexo
+            Mail::to($purchase->customer_email)->send(new PurchaseReceiptMail($purchase, $pdfPath));
+
+            // Limpa o carrinho
             session()->forget('cart');
         });
 
         return redirect()->route('movies.high')->with('alert-type', 'success')->with('alert-msg', 'Purchase completed successfully!');
     }
-
-
-
 
     /**
      * Validate payment details based on payment type.
@@ -128,35 +172,19 @@ class PurchaseController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Purchase $purchase)
+    public function download(Purchase $purchase)
     {
-        //
-    }
+        // Gera o caminho correto do arquivo PDF
+        $pdfPath = storage_path('app/' . $purchase->receipt_pdf_filename);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Purchase $purchase)
-    {
-        //
-    }
+        // Normaliza o caminho do arquivo
+        $normalizedPdfPath = realpath($pdfPath);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Purchase $purchase)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Purchase $purchase)
-    {
-        //
+        // Verifica se o arquivo existe no caminho normalizado
+        if ($normalizedPdfPath && file_exists($normalizedPdfPath)) {
+            return response()->download($normalizedPdfPath);
+        } else {
+            return redirect()->back()->with('alert-type', 'error')->with('alert-msg', 'PDF not Found!');
+        }
     }
 }

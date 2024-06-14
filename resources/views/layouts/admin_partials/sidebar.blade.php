@@ -38,24 +38,18 @@
         <div class="space-y-8">
             <!-- Pages group -->
             <div>
-
                 <h3 class="text-xs uppercase text-slate-500 font-semibold pl-3">
                     <span class="hidden lg:block lg:sidebar-expanded:hidden 2xl:hidden text-center w-6"
                         aria-hidden="true">•••</span>
                     <span class="lg:hidden lg:sidebar-expanded:block 2xl:block">Pages</span>
                 </h3>
                 <ul class="mt-3">
-                    <!-- Dashboard -->
-
-                     <!-- Users -->
-                     @can('viewAny', App\Models\User::class)
+                    <!-- Users -->
+                    @can('viewAny', App\Models\User::class)
                         @php
                             $options = [];
                             $options['Users'] = route('users.index');
                         @endphp
-                        
-
-                       
                         <x-menus.admin-group-menu-items title="Users" :options="$options">
                             <svg class="w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true"
                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
@@ -73,12 +67,10 @@
                             $options = [];
                             $options['Movies'] = route('movies.index');
                         @endphp
-
                         <x-menus.admin-group-menu-items title="Movies" :options="$options">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                             <path d="M11.266 7l12.734-2.625-.008-.042-1.008-4.333-21.169 4.196c-1.054.209-1.815 1.134-1.815 2.207v14.597c0 1.657 1.343 3 3 3h18c1.657 0 3-1.343 3-3v-14h-12.734zm8.844-5.243l2.396 1.604-2.994.595-2.398-1.605 2.996-.594zm-5.898 1.169l2.4 1.606-2.994.595-2.401-1.607 2.995-.594zm-5.904 1.171l2.403 1.608-2.993.595-2.406-1.61 2.996-.593zm-2.555 5.903l2.039-2h3.054l-2.039 2h-3.054zm4.247 10v-7l6 3.414-6 3.586zm4.827-10h-3.054l2.039-2h3.054l-2.039 2zm6.012 0h-3.054l2.039-2h3.054l-2.039 2z" fill="white"/>
                         </svg>
-
                         </x-menus.admin-group-menu-items>
                     @endcan
 
@@ -88,7 +80,6 @@
                             $options = [];
                             $options['Theaters'] = route('theaters.index');
                         @endphp
-
                         <x-menus.admin-group-menu-items title="Theaters" :options="$options">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 3H3v14H21V3z" />
@@ -100,23 +91,50 @@
                         </x-menus.admin-group-menu-items>
                     @endcan
 
-                 <!-- Genres -->
-                @can('viewAny', App\Models\Genre::class)
-                    @php
-                        $options = [];
-                        $options['Genres'] = route('genres.index');
-                    @endphp
-
-                    <x-menus.admin-group-menu-items title="Genres" :options="$options">
+                    <!-- Genres -->
+                    @can('viewAny', App\Models\Genre::class)
+                        @php
+                            $options = [];
+                            $options['Genres'] = route('genres.index');
+                        @endphp
+                        <x-menus.admin-group-menu-items title="Genres" :options="$options">
                         <svg class="w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true"
                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                             viewBox="0 0 24 24">
                             <path d="M22 4.5V8h-3V5l-2 2.5V8h-3V5l-2 2.5V8H9V5L7 7.5V8H4V5L2 7.5V8H1V4.5c0-1.1.9-2 2-2h18c1.1 0 2 .9 2 2zM2 18V10h1v3l2-2.5V10h3v3l2-2.5V10h3v3l2-2.5V10h3v3l2-2.5V10h1v8c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2z"/>
                         </svg>
-                    </x-menus.admin-group-menu-items>
-                @endcan
+                        </x-menus.admin-group-menu-items>
+                    @endcan
 
-                    
+                    <!-- Screenings-->
+                    @can('viewAny', App\Models\Screening::class)
+                        @php
+                            $options = [];
+                            $options['Screening'] = route('screenings.index');
+                        @endphp
+
+                        <x-menus.admin-group-menu-items title="Screening" :options="$options">
+                        <svg class="w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/>
+                        </svg>
+
+                        </x-menus.admin-group-menu-items>
+                    @endcan
+
+                    <!-- Purchases -->
+                    @can('viewAny', App\Models\Purchase::class)
+                        @php
+                            $options = [];
+                            $options['Purchases'] = route('purchases.index');
+                        @endphp
+                        <x-menus.admin-group-menu-items title="Purchases" :options="$options">
+                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M4 5a2 2 0 0 0-2 2v2.5a1 1 0 0 0 1 1 1.5 1.5 0 1 1 0 3 1 1 0 0 0-1 1V17a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2.5a1 1 0 0 0-1-1 1.5 1.5 0 1 1 0-3 1 1 0 0 0 1-1V7a2 2 0 0 0-2-2H4Z"/>
+                          </svg>
+                        </x-menus.admin-group-menu-items>
+                    @endcan
+
+
                     <!-- Only one option -->
                     <x-menus.admin-group-menu-items class="mt-2" title="Voltar ao site" :options="['Home' => route('movies.high')]">
                         <svg class="w-6 h-6 text-gray-400 dark:text-white" width="24" height="24"
@@ -130,9 +148,7 @@
                     </x-menus.admin-group-menu-items>
 
                 </ul>
-
             </div>
-
         </div>
 
         <!-- Expand / collapse button -->
@@ -148,6 +164,5 @@
                 </button>
             </div>
         </div>
-
     </div>
 </div>

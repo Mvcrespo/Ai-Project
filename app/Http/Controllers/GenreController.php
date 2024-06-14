@@ -59,20 +59,24 @@ class GenreController extends \Illuminate\Routing\Controller
 
     public function destroy(Genre $genre): RedirectResponse
     {
+        // Verificar se há filmes associados ao gênero
+        $moviesCount = Movie::where('genre_code', $genre->code)->count();
 
+        if ($moviesCount > 0) {
+            $alertType = 'danger';
+            $alertMsg = "Genre {$genre->name} ({$genre->code}) cannot be deleted because it has associated movies!";
+            return redirect()->route('genres.index')
+                ->with('alert-type', $alertType)
+                ->with('alert-msg', $alertMsg);
+        }
 
         $genre->delete();
 
         $alertType = 'success';
-        $alertMsg = "genre {$genre->name} ({$genre->code}) has been deleted successfully!";
+        $alertMsg = "Genre {$genre->name} ({$genre->code}) has been deleted successfully!";
 
         return redirect()->route('genres.index')
             ->with('alert-type', $alertType)
             ->with('alert-msg', $alertMsg);
-    }
-
-    public function show(genre $genre): View
-    {
-        return view('genres.show')->with('genre', $genre);
     }
 }

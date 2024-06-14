@@ -55,6 +55,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Customer::class, 'id', 'id')->withTrashed();
     }
 
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class, 'customer_id');
+    }
+
+
     public function getPhotoFullUrlAttribute()
     {
         if ($this->photo_filename && Storage::exists("public/photos/{$this->photo_filename}")) {

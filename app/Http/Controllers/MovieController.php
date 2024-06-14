@@ -1,7 +1,5 @@
 <?php
 
-// App\Http\Controllers\MovieController.php
-
 namespace App\Http\Controllers;
 
 use App\Models\Movie;
@@ -22,16 +20,23 @@ class MovieController extends \Illuminate\Routing\Controller
         $this->authorizeResource(Movie::class);
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $movies = Movie::orderBy('title')->paginate(20);
+        $query = Movie::query();
+
+        if ($request->has('search')) {
+            $query->where('title', 'like', '%' . $request->input('search') . '%');
+        }
+
+        $movies = $query->orderBy('title')->paginate(20); // Ordena por título e paginação de 20 por página
         return view('movies.index')->with('movies', $movies);
     }
 
     public function create(): View
     {
         $newmovie = new Movie();
-        return view('movies.create')->with('movie', $newmovie);
+        $genres = Genre::all(); // Obtenha todos os gêneros
+        return view('movies.create')->with(['movie' => $newmovie, 'genres' => $genres]);
     }
 
     public function store(MovieFormRequest $request): RedirectResponse
@@ -57,7 +62,8 @@ class MovieController extends \Illuminate\Routing\Controller
 
     public function edit(Movie $movie): View
     {
-        return view('movies.edit')->with('movie', $movie);
+        $genres = Genre::all(); // Obtenha todos os gêneros
+        return view('movies.edit')->with(['movie' => $movie, 'genres' => $genres]);
     }
 
     public function update(MovieFormRequest $request, Movie $movie): RedirectResponse
@@ -122,27 +128,83 @@ class MovieController extends \Illuminate\Routing\Controller
 
     public function show(Movie $movie): View
     {
-        return view('movies.show')->with('movie', $movie);
+        $genres = Genre::all(); // Obtenha todos os gêneros
+        return view('movies.show')->with(['movie' => $movie, 'genres' => $genres]);
     }
 
-    public function high(Movie $movie): View
+    public function high(Request $request): View
     {
-        $movies = Movie::with('screenings.theater', 'screenings.tickets')->get();
+        $query = $request->input('query');
+        $genre = $request->input('genre');
+
+        $movies = Movie::with('screenings')
+            ->whereHas('screenings', function($query) {
+                $query->whereBetween('date', [now(), now()->addWeeks(2)]);
+            })
+            ->when($query, function ($queryBuilder) use ($query) {
+                $queryBuilder->where(function ($query) use ($queryBuilder) {
+                    $queryBuilder->where('title', 'like', '%' . strtolower($query) . '%')
+                        ->orWhere('synopsis', 'like', '%' . strtolower($query) . '%');
+                });
+            })
+            ->when($genre, function ($queryBuilder) use ($genre) {
+                $queryBuilder->where('genre_code', $genre);
+            })
+            ->paginate(10); // Paginação para 10 filmes por página
+
         $genres = Genre::all();
+
         return view('movies.high', compact('movies', 'genres'));
     }
 
     public function highlighted(Request $request)
     {
-        $movies = Movie::with('screenings.theater', 'screenings.tickets')->get();
+        $query = $request->input('query');
+        $genre = $request->input('genre');
+
+        $movies = Movie::with('screenings')
+            ->whereHas('screenings', function($query) {
+                $query->whereBetween('date', [now(), now()->addWeeks(2)]);
+            })
+            ->when($query, function ($queryBuilder) use ($query) {
+                $queryBuilder->where(function ($query) use ($queryBuilder) {
+                    $queryBuilder->where('title', 'like', '%' . strtolower($query) . '%')
+                        ->orWhere('synopsis', 'like', '%' . strtolower($query) . '%');
+                });
+            })
+            ->when($genre, function ($queryBuilder) use ($genre) {
+                $queryBuilder->where('genre_code', $genre);
+            })
+            ->paginate(10); // Paginação para 10 filmes por página
+
         $genres = Genre::all();
+
         return view('movies.high', compact('movies', 'genres'));
     }
 
     public function highlightedSearch(Request $request)
     {
-        $movies = Movie::with('screenings.theater', 'screenings.tickets')->get();
+        $query = $request->input('query');
+        $genre = $request->input('genre');
+
+        // Realiza a consulta com os filtros aplicados
+        $movies = Movie::with('screenings.theater', 'screenings.tickets')
+            ->whereHas('screenings', function($query) {
+                $query->whereBetween('date', [now(), now()->addWeeks(2)]);
+            })
+            ->when($query, function ($queryBuilder) use ($query) {
+                $queryBuilder->where(function ($queryBuilder) use ($query) {
+                    $queryBuilder->where('title', 'like', '%' . strtolower($query) . '%')
+                        ->orWhere('synopsis', 'like', '%' . strtolower($query) . '%');
+                });
+            })
+            ->when($genre, function ($queryBuilder) use ($genre) {
+                $queryBuilder->where('genre_code', $genre);
+            })
+            ->paginate(10); // Paginação para 10 filmes por página
+
         $genres = Genre::all();
+
         return view('movies.high', compact('movies', 'genres'));
     }
 
@@ -155,4 +217,3 @@ class MovieController extends \Illuminate\Routing\Controller
         return view('movies.high_show', compact('movie'));
     }
 }
-

@@ -12,10 +12,10 @@
                 <div class="md:flex-shrink-0 md:w-1/3">
                     <div class="p-4 bg-white rounded-lg shadow-md">
                         @php
-                            $defaultPhotoUrl = asset('storage/posters/_no_poster_2.png');
-                            $photoUrl = $movie->poster_filename ? asset('storage/posters/' . $movie->poster_filename) : $defaultPhotoUrl;
+                            $defaultPosterUrl = asset('img/default_poster.png');
+                            $posterUrl = $movie->poster_filename ? asset('storage/posters/' . $movie->poster_filename) : $defaultPosterUrl;
                         @endphp
-                        <img src="{{ $photoUrl }}" alt="{{ $movie->title }} poster" class="w-full h-auto rounded-lg mb-4 md:mb-0">
+                        <img src="{{ $posterUrl }}" alt="{{ $movie->title }} poster" class="w-full h-auto rounded-lg mb-4 md:mb-0">
                     </div>
                 </div>
                 <!-- Movie Details -->
