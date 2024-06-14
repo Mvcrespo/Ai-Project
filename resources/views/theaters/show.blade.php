@@ -37,6 +37,7 @@
                     </h2>
                 </header>
                 @include('theaters.shared.fields', ['mode' => 'show'])
+                @include('theaters.shared.seats' , ['mode' => 'show'])
             </section>
         </div>
     </div>

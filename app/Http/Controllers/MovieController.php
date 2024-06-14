@@ -1,5 +1,7 @@
 <?php
 
+// App\Http\Controllers\MovieController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\Movie;
@@ -52,7 +54,6 @@ class MovieController extends \Illuminate\Routing\Controller
             ->with('alert-type', 'success')
             ->with('alert-msg', $htmlMessage);
     }
-
 
     public function edit(Movie $movie): View
     {
@@ -119,7 +120,6 @@ class MovieController extends \Illuminate\Routing\Controller
             ->with('alert-msg', "No poster found to delete for movie {$movie->title}.");
     }
 
-
     public function show(Movie $movie): View
     {
         return view('movies.show')->with('movie', $movie);
@@ -127,21 +127,21 @@ class MovieController extends \Illuminate\Routing\Controller
 
     public function high(Movie $movie): View
     {
-        $movies = Movie::with('screenings')->get();
+        $movies = Movie::with('screenings.theater', 'screenings.tickets')->get();
         $genres = Genre::all();
         return view('movies.high', compact('movies', 'genres'));
     }
 
     public function highlighted(Request $request)
     {
-        $movies = Movie::with('screenings')->get();
+        $movies = Movie::with('screenings.theater', 'screenings.tickets')->get();
         $genres = Genre::all();
         return view('movies.high', compact('movies', 'genres'));
     }
 
     public function highlightedSearch(Request $request)
     {
-        $movies = Movie::with('screenings')->get();
+        $movies = Movie::with('screenings.theater', 'screenings.tickets')->get();
         $genres = Genre::all();
         return view('movies.high', compact('movies', 'genres'));
     }
@@ -149,6 +149,10 @@ class MovieController extends \Illuminate\Routing\Controller
     public function high_show($id): View
     {
         $movie = Movie::with(['screenings.theater', 'screenings.tickets'])->findOrFail($id);
+        foreach ($movie->screenings as $screening) {
+            $screening->isSoldOut = $screening->isSoldOut();
+        }
         return view('movies.high_show', compact('movie'));
     }
 }
+

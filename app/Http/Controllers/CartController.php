@@ -30,19 +30,26 @@ class CartController extends Controller
         $cart = session()->get('cart', collect());
 
         for ($i = 0; $i < count($seatIds); $i++) {
-            $cart->push([
-                'seat_id' => $seatIds[$i],
-                'screening_id' => $screeningIds[$i],
-                'movie_title' => $movieTitles[$i],
-                'seat' => $seats[$i],
-                'price' => $prices[$i],
-            ]);
+            $itemExists = $cart->contains(function ($item) use ($seatIds, $screeningIds, $i) {
+                return $item['seat_id'] == $seatIds[$i] && $item['screening_id'] == $screeningIds[$i];
+            });
+
+            if (!$itemExists) {
+                $cart->push([
+                    'seat_id' => $seatIds[$i],
+                    'screening_id' => $screeningIds[$i],
+                    'movie_title' => $movieTitles[$i],
+                    'seat' => $seats[$i],
+                    'price' => $prices[$i],
+                ]);
+            }
         }
 
         session()->put('cart', $cart);
 
         return back()->with('alert-type', 'success')->with('alert-msg', 'Items added to Shopping Cart');
     }
+
 
     public function removeFromCart(Request $request, $seat_id, $screening_id): RedirectResponse
     {

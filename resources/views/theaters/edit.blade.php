@@ -45,6 +45,7 @@
                     @csrf
                     @method('PUT')
                     @include('theaters.shared.fields', ['mode' => 'edit'])
+                    @include('theaters.shared.seats', ['seatLayout' => $seatLayout])
                     <div class="flex mt-6">
                         <x-button element="submit" type="dark" text="Save" class="uppercase"/>
                         <x-button element="a" type="light" text="Cancel" class="uppercase ms-4"

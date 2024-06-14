@@ -16,10 +16,10 @@
                     </p>
                 </header>
 
-                <form method="POST" action="{{ route('theaters.store') }}"
-                    enctype="multipart/form-data">
+                <form method="POST" action="{{ route('theaters.store') }}" enctype="multipart/form-data">
                     @csrf
                     @include('theaters.shared.fields', ['mode' => 'create'])
+                    @include('theaters.shared.seats', ['mode' => 'create'])
                     <div class="flex mt-6">
                         <x-button element="submit" type="dark" text="Save new theater" class="uppercase"/>
                     </div>

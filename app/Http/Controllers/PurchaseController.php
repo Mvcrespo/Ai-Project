@@ -45,8 +45,15 @@ class PurchaseController extends Controller
         // Verificar se o horário do filme permite a compra
         $now = Carbon::now();
         foreach ($cart as $cartItem) {
-            $screeningTime = Carbon::parse(\App\Models\Screening::find($cartItem['screening_id'])->start_time);
-            if ($now->greaterThanOrEqualTo($screeningTime->subMinutes(5))) {
+            $screening = \App\Models\Screening::find($cartItem['screening_id']);
+            if (!$screening) {
+                return back()->with('alert-type', 'time')->with('alert-msg', 'Screening not found.');
+            }
+
+            // Combine a data e a hora corretamente
+            $screeningTime = Carbon::createFromFormat('Y-m-d H:i:s', $screening->date . ' ' . $screening->start_time);
+
+            if ($now->greaterThanOrEqualTo($screeningTime->copy()->subMinutes(5))) {
                 return back()->with('alert-type', 'time')->with('alert-msg', 'Tickets can only be purchased up to 5 minutes before the movie starts.');
             }
         }
@@ -97,6 +104,9 @@ class PurchaseController extends Controller
 
         return redirect()->route('movies.high')->with('alert-type', 'success')->with('alert-msg', 'Purchase completed successfully!');
     }
+
+
+
 
     /**
      * Validate payment details based on payment type.

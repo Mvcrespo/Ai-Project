@@ -21,7 +21,7 @@
                             <div class="w-8 flex items-center justify-center font-bold text-lg">
                                 {{ $row }}
                             </div>
-                            <div class="flex flex-wrap justify-center w-full">
+                            <div class="flex justify-center flex-nowrap w-full">
                                 @php
                                     $totalSeats = $rowSeats->count();
                                     $leftPadding = max(0, (int)(($maxSeatsInRow - $totalSeats) / 2));

@@ -7,9 +7,10 @@
             <a href="{{ route('movies.high_show', $movie->id) }}" class="relative group bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg transition-transform transform hover:scale-105" style="height: 100%;">
                 <div class="p-4 bg-white dark:bg-gray-900 rounded-lg shadow-md flex flex-col justify-between h-full">
                     @php
-                        $posterUrl = $movie->poster_full_url ? $movie->poster_full_url : asset('img/default_poster.png');
+                        $defaultPhotoUrl = asset('storage/posters/_no_poster_2.png');
+                        $photoUrl = $movie->poster_filename ? asset('storage/posters/' . $movie->poster_filename) : $defaultPhotoUrl;
                     @endphp
-                    <img src="{{ $posterUrl }}" alt="{{ $movie->title }}" class="rounded-lg mb-4" style="width: 100%; height: 340px; object-fit: contain;">
+                    <img src="{{ $photoUrl }}" alt="{{ $movie->title }}" class="rounded-lg mb-4" style="width: 100%; height: 340px; object-fit: contain;">
 
 
                     <div class="text-center">

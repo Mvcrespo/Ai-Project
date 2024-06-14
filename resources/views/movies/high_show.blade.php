@@ -12,9 +12,10 @@
                 <div class="md:flex-shrink-0 md:w-1/3">
                     <div class="p-4 bg-white rounded-lg shadow-md">
                         @php
-                            $posterUrl = $movie->poster_full_url ? $movie->poster_full_url : asset('img/default_poster.png');
+                            $defaultPhotoUrl = asset('storage/posters/_no_poster_2.png');
+                            $photoUrl = $movie->poster_filename ? asset('storage/posters/' . $movie->poster_filename) : $defaultPhotoUrl;
                         @endphp
-                        <img src="{{ $posterUrl}}" alt="{{ $movie->title }} poster" class="w-full h-auto rounded-lg mb-4 md:mb-0">
+                        <img src="{{ $photoUrl }}" alt="{{ $movie->title }} poster" class="w-full h-auto rounded-lg mb-4 md:mb-0">
                     </div>
                 </div>
                 <!-- Movie Details -->
@@ -70,7 +71,8 @@
             const goToTheaterDiv = document.getElementById('go-to-theater');
             const theaterLink = document.getElementById('theater-link');
 
-            const sessions = @json($movie->screenings);
+            const today = new Date().toISOString().split('T')[0];
+            const sessions = @json($movie->screenings).filter(session => session.date >= today);
 
             dateSelect.addEventListener('change', function() {
                 const selectedDate = this.value;
