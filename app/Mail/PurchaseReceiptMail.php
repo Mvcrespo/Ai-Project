@@ -13,17 +13,19 @@ class PurchaseReceiptMail extends Mailable
     use Queueable, SerializesModels;
 
     public $purchase;
-    public $pdfPath;
+    public $pdfReceiptPath;
+    public $pdfTicketsContent;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(Purchase $purchase, $pdfPath)
+    public function __construct($purchase, $pdfReceiptPath, $pdfTicketsContent)
     {
         $this->purchase = $purchase;
-        $this->pdfPath = $pdfPath;
+        $this->pdfReceiptPath = $pdfReceiptPath;
+        $this->pdfTicketsContent = $pdfTicketsContent;
     }
 
     /**
@@ -34,9 +36,11 @@ class PurchaseReceiptMail extends Mailable
     public function build()
     {
         return $this->view('emails.purchase_receipt')
-                    ->subject('Your Purchase Receipt')
-                    ->attach($this->pdfPath, [
+                    ->attach($this->pdfReceiptPath, [
                         'as' => 'receipt.pdf',
+                        'mime' => 'application/pdf',
+                    ])
+                    ->attachData($this->pdfTicketsContent, 'tickets.pdf', [
                         'mime' => 'application/pdf',
                     ]);
     }

@@ -84,23 +84,25 @@
                     </h2>
                 </header>
 
-                @foreach($user->purchases as $purchase)
+                @foreach($purchases as $purchase)
                     <div class="my-4 p-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="flex justify-between items-center">
                             <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Purchase on {{ \Carbon\Carbon::parse($purchase->created_at)->format('Y-m-d H:i:s') }}</h3>
                             <div class="flex space-x-2">
                                 <button class="bg-blue-500 text-white px-3 py-1 rounded-lg" onclick="toggleTickets('tickets-{{ $purchase->id }}')">Details</button>
-                                <a href="{{ route('purchase.download', $purchase->id) }}" class="bg-green-500 text-white px-3 py-1 rounded-lg">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M16.707 10.293a1 1 0 00-1.414 0L11 14.586V3a1 1 0 10-2 0v11.586L4.707 10.293a1 1 0 00-1.414 1.414l6 6a1 1 0 001.414 0l6-6a1 1 0 000-1.414z" clip-rule="evenodd" />
-                                    </svg>
-                                </a>
+                                @if ($purchase->receipt_pdf_filename)
+                                    <a href="{{ route('purchase.download', $purchase->id) }}" class="bg-green-500 text-white px-3 py-1 rounded-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M16.707 10.293a1 1 0 00-1.414 0L11 14.586V3a1 1 0 10-2 0v11.586L4.707 10.293a1 1 0 00-1.414 1.414l6 6a1 1 0 001.414 0l6-6a1 1 0 000-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                @endif
                             </div>
                         </div>
-                        <p class="dark:text-gray-400">Total Price: ${{ $purchase->total_price }}</p>
+                        <p class="dark:text-gray-400">Purchase ID: {{ $purchase->id }}</p>
                         <!-- Additional details initially hidden -->
                         <div class="hidden dark:text-gray-400 mt-2" id="tickets-{{ $purchase->id }}">
-                            <p>Purchase ID: {{ $purchase->id }}</p>
+                            <p >Total Price: ${{ $purchase->total_price }}</p>
                             <p>Payment Type: {{ $purchase->payment_type }}</p>
                             <p>Payment Ref: {{ $purchase->payment_ref }}</p>
                             <div class="mt-4">
@@ -123,10 +125,16 @@
                                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">${{ $ticket->price }}</td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ $ticket->status }}</td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
-                                                    @if($ticket->status == 'valid')
-                                                        <x-table.icon-show class="ps-3 px-0.5"
-                                                            href="{{ route('tickets.show', $ticket->id) }}"/>
-                                                    @endif
+                                                    <div class="flex space-x-2">
+                                                        <x-table.icon-show class="ps-3 px-0.5" href="{{ route('tickets.show', $ticket->id) }}"/>
+                                                        @if($ticket->status == 'valid')
+                                                            <a href="{{ route('tickets.download', $ticket->id) }}" class="text-white px-3 py-1 rounded-lg">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                                    <path fill-rule="evenodd" d="M16.707 10.293a1 1 0 00-1.414 0L11 14.586V3a1 1 0 10-2 0v11.586L4.707 10.293a1 1 0 00-1.414 1.414l6 6a1 1 0 001.414 0l6-6a1 1 0 000-1.414z" clip-rule="evenodd" />
+                                                                </svg>
+                                                            </a>
+                                                        @endif
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -136,6 +144,11 @@
                         </div>
                     </div>
                 @endforeach
+
+                <!-- Links de paginação -->
+                <div class="mt-4">
+                    {{ $purchases->links() }}
+                </div>
             </section>
         </div>
     </div>

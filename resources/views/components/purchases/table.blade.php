@@ -11,6 +11,7 @@
                 @if($showView)
                     <th></th>
                 @endif
+                <th></th> <!-- Nova coluna para o botão de download -->
             </tr>
         </thead>
         <tbody>
@@ -32,6 +33,16 @@
                             <td></td>
                         @endcan
                     @endif
+                    <!-- Botão de download -->
+                    <td>
+                        @if($purchase->receipt_pdf_filename)
+                            <a href="{{ route('purchase.download', $purchase->id) }}" class="text-white px-3 py-1 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M16.707 10.293a1 1 0 00-1.414 0L11 14.586V3a1 1 0 10-2 0v11.586L4.707 10.293a1 1 0 00-1.414 1.414l6 6a1 1 0 001.414 0l6-6a1 1 0 000-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>

@@ -19,7 +19,6 @@
             <p class="text-lg text-gray-700"><strong>Name:</strong> {{ $purchase->customer_name }}</p>
             <p class="text-lg text-gray-700"><strong>Email:</strong> {{ $purchase->customer_email }}</p>
             <p class="text-lg text-gray-700"><strong>NIF:</strong> {{ $purchase->nif }}</p>
-            <p class="text-lg text-gray-700"><strong>Total Price:</strong> ${{ number_format($purchase->total_price, 2) }}</p>
         </div>
         <table class="w-full table-auto mb-6">
             <thead>

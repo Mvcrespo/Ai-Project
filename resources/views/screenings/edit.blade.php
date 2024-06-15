@@ -46,11 +46,7 @@
                     <div class="mt-6 space-y-4">
                         @include('screenings.shared.fields', ['mode' => 'edit', 'movies' => $movies, 'theaters' => $theaters, 'relatedScreenings' => $relatedScreenings])
                     </div>
-                    <div class="flex mt-6">
-                        <x-button element="submit" type="dark" text="Save" class="uppercase"/>
-                        <x-button element="a" type="light" text="Cancel" class="uppercase ms-4"
-                                    href="{{ url()->full() }}"/>
-                    </div>
+
                 </form>
             </section>
         </div>

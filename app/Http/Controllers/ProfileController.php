@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\User;
+use App\Models\Purchase;
 
 class ProfileController extends Controller
 {
@@ -17,14 +18,7 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        $user = User::with([
-            'purchases' => function($query) {
-                $query->orderBy('created_at', 'desc');
-            },
-            'purchases.tickets.screening.movie',
-            'purchases.tickets.seat',
-            'purchases.tickets.screening.theater'
-        ])->findOrFail(Auth::id());
+        $user = User::findOrFail(Auth::id());
 
         // Verificar se o usuário é do tipo 'A' (admin) ou 'C' (customer)
         if ($user->type !== 'A' && $user->type !== 'C') {
@@ -33,11 +27,22 @@ class ProfileController extends Controller
 
         $customer = $user->customer; // Buscar informações do cliente
 
+        $purchases = Purchase::with([
+            'tickets.screening.movie',
+            'tickets.seat',
+            'tickets.screening.theater'
+        ])->where('customer_id', $user->id)
+          ->orderBy('created_at', 'desc')
+          ->paginate(5);
+
         return view('profile.edit-profile', [
             'user' => $user,
             'customer' => $customer,
+            'purchases' => $purchases,
         ]);
     }
+
+
 
     public function editPassword(Request $request): View
     {

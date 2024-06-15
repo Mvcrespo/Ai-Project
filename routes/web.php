@@ -61,7 +61,12 @@ Route::get('/purchases/{purchase}', [PurchaseController::class, 'show'])->name('
 Route::post('/purchase', [PurchaseController::class, 'store'])->name('purchase.store');
 Route::get('/purchases/{purchase}/download', [PurchaseController::class, 'download'])->name('purchase.download');
 
+Route::resource('tickets', TicketController::class);
+Route::get('/tickets/download/{ticket}', [TicketController::class, 'download'])->name('tickets.download');
+Route::get('/tickets/validate/{qrcode_url}', [TicketController::class, 'validateByQrCode'])->name('tickets.validateByQrCode');
 
-Route::get('tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
 
 Route::resource('screenings', ScreeningController::class);
+Route::get('/session-control', [ScreeningController::class, 'selectSession'])->name('session.control');
+Route::post('/session-control', [ScreeningController::class, 'validateTicket'])->name('session.validate');
+

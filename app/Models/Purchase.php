@@ -28,9 +28,9 @@ class Purchase extends Model
         }
     }
 
-    public function customer(): HasOne
+    public function customer()
     {
-        return $this->hasOne(Customer::class)->withTrashed();
+        return $this->belongsTo(User::class, 'customer_id');
     }
 
     public function tickets(): HasMany

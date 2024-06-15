@@ -4,64 +4,93 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Log;
 
-class TicketController extends Controller
+class TicketController extends \Illuminate\Routing\Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    use AuthorizesRequests;
+
+    public function __construct()
+    {
+        $this->authorizeResource(Ticket::class, 'ticket');
+    }
+
     public function index()
     {
         //
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         //
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
+    public function show(Ticket $ticket)
     {
-        $ticket = Ticket::with(['screening.movie', 'screening.theater', 'seat', 'purchase.customer'])->findOrFail($id);
+        $ticket->load(['screening.movie', 'screening.theater', 'seat', 'purchase.customer']);
+
+        $this->authorize('view', $ticket);
 
         return view('tickets.show', compact('ticket'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Ticket $ticket)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Ticket $ticket)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Ticket $ticket)
     {
         //
+    }
+
+    public function download(Ticket $ticket)
+    {
+        $this->authorize('download', $ticket);
+
+        $purchase = $ticket->purchase;
+
+        $pdf = PDF::loadView('tickets.pdf', compact('ticket', 'purchase'));
+        return $pdf->download('ticket_' . $ticket->id . '.pdf');
+    }
+
+    public function validateByQrCode($qrcode_url)
+    {
+        $ticket = Ticket::where('qrcode_url', 'like', '%' . $qrcode_url)->first();
+
+        if (!$ticket) {
+            return redirect()->route('movies.high')->with('alert-type', 'error')->with('alert-msg', 'Invalid ticket.');
+        }
+
+
+        $user = Auth::user();
+        $this->authorize('validateByQrCode', $user);
+
+        $screening = $ticket->screening;
+
+        if ($ticket->status != 'valid') {
+            Session::flash('alert-type', 'error');
+            Session::flash('alert-msg', 'This ticket is invalid and cannot be used.');
+        } else {
+            $ticket->update(['status' => 'invalid']);
+            Session::flash('alert-type', 'success');
+            Session::flash('alert-msg', 'Ticket validated successfully.');
+        }
+
+        return view('tickets.show', compact('ticket', 'screening'))->with('isValidation', true);
     }
 }

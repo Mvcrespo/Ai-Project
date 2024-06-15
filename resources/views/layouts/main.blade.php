@@ -93,6 +93,12 @@
                                     selectable="0"
                                     href="{{ route('users.index') }}"/>
                                 @endif
+                                @if(Auth::user()->type == 'E')
+                                <x-menus.submenu-item
+                                    content="Validate"
+                                    selectable="0"
+                                    href="{{ route('session.control') }}"/>
+                                @endif
                                 <x-menus.submenu-item
                                     content="Change Password"
                                     selectable="0"
@@ -105,8 +111,9 @@
                                 <x-menus.submenu-item
                                     content="Log Out"
                                     selectable="0"
-                                    form="logout_form"
+                                    onclick="event.preventDefault(); document.getElementById('logout_form').submit();"
                                 />
+
                             </x-menus.submenu>
                         @else
                             <!-- Menu Item: Login -->
