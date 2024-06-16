@@ -157,21 +157,23 @@ class ScreeningController extends \Illuminate\Routing\Controller
 
     public function edit(Screening $screening, Request $request): View
     {
-        $movies = Movie::all()->pluck('title', 'id')->toArray();
-        $theaters = Theater::all()->pluck('name', 'id')->toArray();
+        $movies = Movie::orderBy('title')->pluck('title', 'id')->toArray();
 
+        $theaters = Theater::orderBy('name')->pluck('name', 'id')->toArray();
 
         $request->validate([
             'filter_day' => 'nullable|integer|min:1|max:31',
             'filter_month' => 'nullable|integer|min:1|max:12',
-            'filter_year' => 'nullable|integer|min:1900|max:2024' . date('Y'),
+            'filter_year' => 'nullable|integer|min:1900|max:2024',
         ]);
-
 
         $query = Screening::where('movie_id', $screening->movie_id)
             ->where('theater_id', $screening->theater_id)
+            ->join('movies', 'screenings.movie_id', '=', 'movies.id')
+            ->orderBy('movies.title', 'asc')
             ->orderBy('date', 'desc')
-            ->orderBy('start_time', 'desc');
+            ->orderBy('start_time', 'desc')
+            ->select('screenings.*');
 
         if ($request->filled('filter_day')) {
             $query->whereDay('date', $request->filter_day);
@@ -189,6 +191,8 @@ class ScreeningController extends \Illuminate\Routing\Controller
 
         return view('screenings.edit', compact('screening', 'movies', 'theaters', 'relatedScreenings'));
     }
+
+
 
     public function show(Screening $screening, Request $request): View
     {

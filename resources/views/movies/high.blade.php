@@ -1,7 +1,7 @@
 {{-- resources/views/movies/high.blade.php --}}
 @extends('layouts.main')
 
-@section('header-title', 'Highlighted Movies')
+@section('header-title', 'Movies On Show')
 
 @section('main')
     <main class="container mx-auto p-4">
@@ -37,6 +37,9 @@
                 @endphp
                 @include('movies.shared.movies-list', ['movies' => $highlightedMovies])
             </div>
+        </div>
+        <div class="mt-4 flex justify-center">
+            {{ $movies->links() }}
         </div>
     </main>
 @endsection

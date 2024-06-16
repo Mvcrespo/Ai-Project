@@ -8,7 +8,6 @@
     <div class="container mx-auto px-4">
         <div class="bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden mb-8 p-6">
             <div class="flex flex-col md:flex-row">
-                <!-- Poster Image -->
                 <div class="md:flex-shrink-0 md:w-1/3">
                     <div class="p-4 bg-white rounded-lg shadow-md">
                         @php
@@ -18,7 +17,6 @@
                         <img src="{{ $posterUrl }}" alt="{{ $movie->title }} poster" class="w-full h-auto rounded-lg mb-4 md:mb-0">
                     </div>
                 </div>
-                <!-- Movie Details -->
                 <div class="md:ml-6 md:flex-1">
                     <h1 class="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-200">{{ $movie->title }}</h1>
                     <p class="text-gray-700 dark:text-gray-300 mb-2 font-bold">Genre: {{ $movie->genre_code }}</p>

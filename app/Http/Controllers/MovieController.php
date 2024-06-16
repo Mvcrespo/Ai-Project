@@ -150,7 +150,7 @@ class MovieController extends \Illuminate\Routing\Controller
             ->when($genre, function ($queryBuilder) use ($genre) {
                 $queryBuilder->where('genre_code', $genre);
             })
-            ->paginate(10);
+            ->paginate(12);
 
         $genres = Genre::all();
 
