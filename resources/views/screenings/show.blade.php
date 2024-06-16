@@ -33,7 +33,7 @@
                 </div>
                 <header>
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        Screening for "{{ $screening->movie->title }}"
+                        Screenings for "{{ $screening->movie->title }}"
                     </h2>
                 </header>
                 <div class="mt-6 space-y-4">

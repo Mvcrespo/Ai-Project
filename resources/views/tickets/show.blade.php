@@ -25,9 +25,26 @@
                 </div>
             </div>
         @endif
-        @if(!isset($isValidation) || !$isValidation)
+
+        @if(!isset($isValidationEmploy) && !isset($isValidation))
             <div class="text-center mb-6">
                 <p class="text-xl font-semibold"><strong>Status:</strong> <span class="{{ $ticket->status == 'valid' ? 'text-green-600' : 'text-red-600' }}">{{ $ticket->status == 'valid' ? 'Valid' : 'Invalid' }}</span></p>
+            </div>
+        @endif
+
+        @if(isset($isValidationEmploy) && $isValidationEmploy)
+            <div class="text-center mt-6">
+                <form action="{{ route('tickets.validateByQrCode', ['qrcode_url' => basename($ticket->qrcode_url)]) }}" method="POST">
+                    @csrf
+                    <button type="submit" name="action" value="validate" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700">Validate</button>
+                    <button type="submit" name="action" value="invalidate" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700">Invalidate</button>
+                </form>
+            </div>
+        @endif
+
+        @if((isset($isValidation) && $isValidation) && (!isset($isValidationEmploy) || !$isValidationEmploy))
+            <div class="text-center mt-6">
+                <a href="{{ route('session.control') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Back to Session Control</a>
             </div>
         @endif
     </div>

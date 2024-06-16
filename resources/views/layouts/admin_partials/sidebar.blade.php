@@ -44,6 +44,25 @@
                     <span class="lg:hidden lg:sidebar-expanded:block 2xl:block">Pages</span>
                 </h3>
                 <ul class="mt-3">
+
+                    <!-- Home/Statistics -->
+                    @can('viewAny', App\Models\User::class)
+                        @php
+                            $options = [];
+                            $options['statistics'] = route('statistics.show');
+                        @endphp
+                        <x-menus.admin-group-menu-items title="Home" :options="$options">
+                            <svg class="w-6 h-6 text-gray-400 dark:text-white" width="24" height="24"
+                                viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" />
+                                <polyline points="5 12 3 12 12 3 21 12 19 12" />
+                                <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+                                <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+                            </svg>
+                        </x-menus.admin-group-menu-items>
+                    @endcan
+
                     <!-- Users -->
                     @can('viewAny', App\Models\User::class)
                         @php
@@ -68,9 +87,9 @@
                             $options['Movies'] = route('movies.index');
                         @endphp
                         <x-menus.admin-group-menu-items title="Movies" :options="$options">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                            <path d="M11.266 7l12.734-2.625-.008-.042-1.008-4.333-21.169 4.196c-1.054.209-1.815 1.134-1.815 2.207v14.597c0 1.657 1.343 3 3 3h18c1.657 0 3-1.343 3-3v-14h-12.734zm8.844-5.243l2.396 1.604-2.994.595-2.398-1.605 2.996-.594zm-5.898 1.169l2.4 1.606-2.994.595-2.401-1.607 2.995-.594zm-5.904 1.171l2.403 1.608-2.993.595-2.406-1.61 2.996-.593zm-2.555 5.903l2.039-2h3.054l-2.039 2h-3.054zm4.247 10v-7l6 3.414-6 3.586zm4.827-10h-3.054l2.039-2h3.054l-2.039 2zm6.012 0h-3.054l2.039-2h3.054l-2.039 2z" fill="white"/>
-                        </svg>
+                            <svg class="text-gray-400 dark:text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path d="M11.266 7l12.734-2.625-.008-.042-1.008-4.333-21.169 4.196c-1.054.209-1.815 1.134-1.815 2.207v14.597c0 1.657 1.343 3 3 3h18c1.657 0 3-1.343 3-3v-14h-12.734zm8.844-5.243l2.396 1.604-2.994.595-2.398-1.605 2.996-.594zm-5.898 1.169l2.4 1.606-2.994.595-2.401-1.607 2.995-.594zm-5.904 1.171l2.403 1.608-2.993.595-2.406-1.61 2.996-.593zm-2.555 5.903l2.039-2h3.054l-2.039 2h-3.054zm4.247 10v-7l6 3.414-6 3.586zm4.827-10h-3.054l2.039-2h3.054l-2.039 2zm6.012 0h-3.054l2.039-2h3.054l-2.039 2z" fill="currentColor"/>
+                            </svg>
                         </x-menus.admin-group-menu-items>
                     @endcan
 
@@ -81,7 +100,7 @@
                             $options['Theaters'] = route('theaters.index');
                         @endphp
                         <x-menus.admin-group-menu-items title="Theaters" :options="$options">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="text-gray-400 dark:text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 3H3v14H21V3z" />
                             <path d="M3 17h18v4H3z" />
                             <circle cx="7" cy="19" r="1" />
@@ -128,22 +147,9 @@
                             $options['Purchases'] = route('purchases.index');
                         @endphp
                         <x-menus.admin-group-menu-items title="Purchases" :options="$options">
-                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M4 5a2 2 0 0 0-2 2v2.5a1 1 0 0 0 1 1 1.5 1.5 0 1 1 0 3 1 1 0 0 0-1 1V17a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2.5a1 1 0 0 0-1-1 1.5 1.5 0 1 1 0-3 1 1 0 0 0 1-1V7a2 2 0 0 0-2-2H4Z"/>
                           </svg>
-                        </x-menus.admin-group-menu-items>
-                    @endcan
-
-                    <!-- Validate -->
-                    @can('viewAny', App\Models\Screening::class)
-                        @php
-                            $options = [];
-                            $options['Screenings'] = route('session.control');
-                        @endphp
-                        <x-menus.admin-group-menu-items title="Validate" :options="$options">
-                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M4 5a2 2 0 0 0-2 2v2.5a1 1 0 0 0 1 1 1.5 1.5 0 1 1 0 3 1 1 0 0 0-1 1V17a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2.5a1 1 0 0 0-1-1 1.5 1.5 0 1 1 0-3 1 1 0 0 0 1-1V7a2 2 0 0 0-2-2H4Z"/>
-                            </svg>
                         </x-menus.admin-group-menu-items>
                     @endcan
 

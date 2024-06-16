@@ -1,10 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tickets</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
         }
         .customer-info {
             display: flex;
@@ -12,26 +21,40 @@
             margin-bottom: 20px;
         }
         .customer-info img {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            margin-right: 20px;
+            margin-right: 16px;
         }
         .customer-details {
-            display: flex;
-            flex-direction: column;
+            font-size: 18px;
+        }
+        .customer-details p {
+            margin: 0;
         }
         .ticket {
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
             margin-bottom: 20px;
-            padding: 20px;
-            border-radius: 5px;
+            page-break-after: always;
         }
-        .ticket:not(:first-child) {
-            page-break-before: always; /* Adiciona uma quebra de página antes de cada ticket, exceto o primeiro */
+        .ticketlast {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .ticket p {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        .ticket p strong {
+            display: inline-block;
+            width: 120px;
         }
         .ticket img {
-            margin-top: 10px;
+            margin-top: 8px;
         }
     </style>
 </head>
@@ -44,32 +67,36 @@
             <img src="{{ asset('/img/default_user.png') }}" alt="Default Avatar">
         @endif
         <div class="customer-details">
-            <p><strong>Name:</strong> {{ $purchase->customer_name ?? 'Guest' }}</p>
-            <p><strong>Email:</strong> {{ $purchase->customer_email ?? 'Not Provided' }}</p>
+            <p><strong>Name:</strong> {{ $purchase->customer_name }}</p>
+            <p><strong>Email:</strong> {{ $purchase->customer_email }}</p>
         </div>
     </div>
 
     @isset($tickets)
-        @foreach($tickets as $ticket)
-            <div class="ticket">
-                <p><strong>Ticket ID:</strong> {{ $ticket->id }}</p>
-                <p><strong>Movie:</strong> {{ $ticket->screening->movie->title }}</p>
-                <p><strong>Theater:</strong> {{ $ticket->screening->theater->name }}</p>
-                <p><strong>Date & Time:</strong> {{ $ticket->screening->date }} {{ $ticket->screening->start_time }}</p>
-                <p><strong>Seat:</strong> {{ $ticket->seat->row }}{{ $ticket->seat->seat_number }}</p>
-                <p><strong>QR Code:</strong></p>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ $ticket->qrcode_url }}" alt="QR Code">
-            </div>
+        @foreach($tickets as $index => $ticket)
+            @if ($index === count($tickets) - 1)
+                <div class="ticketlast">
+            @else
+                <div class="ticket">
+            @endif
+                    <p><strong>Ticket ID:</strong> {{ $ticket->id }}</p>
+                    <p><strong>Movie:</strong> {{ $ticket->screening->movie->title }}</p>
+                    <p><strong>Theater:</strong> {{ $ticket->screening->theater->name }}</p>
+                    <p><strong>Date & Time:</strong> {{ $ticket->screening->date }} {{ $ticket->screening->start_time }}</p>
+                    <p><strong>Seat:</strong> {{ $ticket->seat->row }}{{ $ticket->seat->seat_number }}</p>
+                    <p><strong>QR Code:</strong></p>
+                    <img class="mt-2" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ $ticket->qrcode_url }}" alt="QR Code">
+                </div>
         @endforeach
     @else
-        <div class="ticket">
+        <div class="ticketlast">
             <p><strong>Ticket ID:</strong> {{ $ticket->id }}</p>
             <p><strong>Movie:</strong> {{ $ticket->screening->movie->title }}</p>
             <p><strong>Theater:</strong> {{ $ticket->screening->theater->name }}</p>
             <p><strong>Date & Time:</strong> {{ $ticket->screening->date }} {{ $ticket->screening->start_time }}</p>
             <p><strong>Seat:</strong> {{ $ticket->seat->row }}{{ $ticket->seat->seat_number }}</p>
             <p><strong>QR Code:</strong></p>
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ $ticket->qrcode_url }}" alt="QR Code">
+            <img class="mt-2" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ $ticket->qrcode_url }}" alt="QR Code">
         </div>
     @endisset
 </body>

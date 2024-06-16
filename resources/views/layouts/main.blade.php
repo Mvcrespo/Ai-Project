@@ -91,7 +91,7 @@
                                 <x-menus.submenu-item
                                     content="DashBoard"
                                     selectable="0"
-                                    href="{{ route('users.index') }}"/>
+                                    href="{{ route('statistics.show') }}"/>
                                 @endif
                                 @if(Auth::user()->type == 'E')
                                 <x-menus.submenu-item

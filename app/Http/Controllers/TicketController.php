@@ -68,7 +68,7 @@ class TicketController extends \Illuminate\Routing\Controller
         return $pdf->download('ticket_' . $ticket->id . '.pdf');
     }
 
-    public function validateByQrCode($qrcode_url)
+    public function validateByQrCode(Request $request, $qrcode_url)
     {
         $ticket = Ticket::where('qrcode_url', 'like', '%' . $qrcode_url)->first();
 
@@ -76,21 +76,35 @@ class TicketController extends \Illuminate\Routing\Controller
             return redirect()->route('movies.high')->with('alert-type', 'error')->with('alert-msg', 'Invalid ticket.');
         }
 
-
-        $user = Auth::user();
-        $this->authorize('validateByQrCode', $user);
+        $this->authorize('validateByQrCode', $ticket);
 
         $screening = $ticket->screening;
 
-        if ($ticket->status != 'valid') {
-            Session::flash('alert-type', 'error');
-            Session::flash('alert-msg', 'This ticket is invalid and cannot be used.');
+        if ($request->isMethod('post')) {
+            if ($request->action == 'validate') {
+                $ticket->update(['status' => 'invalid']);
+                Session::flash('alert-type', 'success');
+                Session::flash('alert-msg', 'Ticket validated successfully.');
+            } elseif ($request->action == 'invalidate') {
+                Session::flash('alert-type', 'success');
+                Session::flash('alert-msg', 'Ticket invalidated successfully.');
+            }
+
+            return redirect()->route('session.control');
         } else {
-            $ticket->update(['status' => 'invalid']);
-            Session::flash('alert-type', 'success');
-            Session::flash('alert-msg', 'Ticket validated successfully.');
+            if ($ticket->status != 'valid') {
+                Session::flash('alert-type', 'error');
+                Session::flash('alert-msg', 'This ticket is invalid and cannot be used.');
+            } else {
+                Session::flash('alert-type', 'success');
+                Session::flash('alert-msg', 'Ticket is valid.');
+            }
         }
 
-        return view('tickets.show', compact('ticket', 'screening'))->with('isValidation', true);
+        return view('tickets.show', compact('ticket', 'screening'))->with('isValidation', true)->with('isValidationEmploy', true);
     }
+
+
+
+
 }

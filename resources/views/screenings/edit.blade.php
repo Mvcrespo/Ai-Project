@@ -33,7 +33,7 @@
                 </div>
                 <header>
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        Edit Screening for "{{ $screening->movie->title }}"
+                        Edit Screenings for "{{ $screening->movie->title }}"
                     </h2>
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-300 mb-6">
                         Click on "Save" button to store the information.

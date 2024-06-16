@@ -12,6 +12,17 @@
         <button type="submit" class="btn btn-primary bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Search</button>
     </form>
 
+    <!-- Sessão selecionada -->
+    <div id="selected-session" class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg hidden">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Selected Session</h2>
+        <div class="text-gray-900 dark:text-gray-100">
+            <p id="selected-movie"></p>
+            <p id="selected-theater"></p>
+            <p id="selected-date"></p>
+            <p id="selected-time"></p>
+        </div>
+    </div>
+
     <!-- Lista de sessões de exibição -->
     <form action="{{ route('session.validate') }}" method="POST" class="mb-4">
         @csrf
@@ -27,10 +38,10 @@
                 </thead>
                 <tbody>
                     @foreach($screenings as $screening)
-                        <tr class="hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onclick="selectSession({{ $screening->id }}, this)">
+                        <tr class="hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onclick="selectSession({{ $screening->id }}, '{{ $screening->movie->title }}', '{{ $screening->theater->name }}', '{{ $screening->date }}', '{{ \Carbon\Carbon::parse($screening->start_time)->format('H:i') }}', this)">
                             <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">{{ $screening->movie->title }}</td>
                             <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">{{ $screening->theater->name }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">{{ ($screening->date) }}</td>
+                            <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">{{ $screening->date }}</td>
                             <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">{{ \Carbon\Carbon::parse($screening->start_time)->format('H:i') }}</td>
                         </tr>
                     @endforeach
@@ -58,22 +69,38 @@
     document.addEventListener('DOMContentLoaded', function() {
         const selectedSessionId = localStorage.getItem('selectedSessionId');
         if (selectedSessionId) {
+            const selectedSessionDetails = JSON.parse(localStorage.getItem('selectedSessionDetails'));
             document.getElementById('screening_id').value = selectedSessionId;
+            if (selectedSessionDetails) {
+                showSelectedSession(selectedSessionDetails.movie, selectedSessionDetails.theater, selectedSessionDetails.date, selectedSessionDetails.time);
+            }
             const rows = document.querySelectorAll('tbody tr');
             rows.forEach(row => {
-                if (row.getAttribute('onclick').includes(selectedSessionId)) {
+                const rowId = row.getAttribute('onclick').match(/\d+/)[0];
+                if (rowId == selectedSessionId) {
                     row.classList.add('bg-blue-100', 'dark:bg-blue-700');
                 }
             });
         }
     });
 
-    function selectSession(id, row) {
+    function selectSession(id, movie, theater, date, time, row) {
         document.getElementById('screening_id').value = id;
         localStorage.setItem('selectedSessionId', id);
+        const sessionDetails = { movie, theater, date, time };
+        localStorage.setItem('selectedSessionDetails', JSON.stringify(sessionDetails));
         const rows = document.querySelectorAll('tbody tr');
         rows.forEach(r => r.classList.remove('bg-blue-100', 'dark:bg-blue-700'));
         row.classList.add('bg-blue-100', 'dark:bg-blue-700');
+        showSelectedSession(movie, theater, date, time);
+    }
+
+    function showSelectedSession(movie, theater, date, time) {
+        document.getElementById('selected-session').classList.remove('hidden');
+        document.getElementById('selected-movie').innerText = `Movie: ${movie}`;
+        document.getElementById('selected-theater').innerText = `Theater: ${theater}`;
+        document.getElementById('selected-date').innerText = `Date: ${date}`;
+        document.getElementById('selected-time').innerText = `Time: ${time}`;
     }
 </script>
 @endsection
