@@ -32,6 +32,11 @@ class ScreeningPolicy
         return $user->type === 'A';
     }
 
+    public function destroySingle(User $user, Screening $screening): bool
+    {
+        return $user->type === 'A';
+    }
+
     public function restore(User $user, Screening $screening): bool
     {
         return $user->type === 'A';

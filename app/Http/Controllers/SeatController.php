@@ -86,8 +86,6 @@ class SeatController extends Controller
         $configuration = Configuration::first();
         $ticketPrice = $configuration ? $configuration->ticket_price : 0;
 
-        Log::info('Checking ticket details', ['seat_id' => $seatId, 'screening_id' => $screeningId]);
-
         $ticket = Ticket::where('seat_id', $seatId)
                        ->where('screening_id', $screeningId)
                        ->where('status', 'valid')
@@ -95,18 +93,15 @@ class SeatController extends Controller
                        ->first();
 
         if ($ticket) {
-            Log::info('Ticket found', ['ticket' => $ticket]);
 
             return response()->json([
                 'id' => $ticket->id,
                 'seat_id' => $ticket->seat_id,
-                'price' => $ticketPrice, // Always use the configuration price
+                'price' => $ticketPrice,
                 'status' => $ticket->status === 'valid' && $ticket->purchase_id === null,
                 'purchase_id' => $ticket->purchase_id,
             ]);
         } else {
-            Log::warning('No ticket available for this seat', ['seat_id' => $seatId, 'screening_id' => $screeningId]);
-
             return response()->json([
                 'id' => null,
                 'seat_id' => $seatId,

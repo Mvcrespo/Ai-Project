@@ -46,15 +46,24 @@
             </table>
         </div>
         <input type="hidden" id="screening_id" name="screening_id" required>
+        @error('screening_id')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+        @enderror
 
         <div class="mt-4">
             <label for="ticket_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ticket ID (optional)</label>
             <input type="text" id="ticket_id" name="ticket_id" class="block w-full mt-1 text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            @error('ticket_id')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
         </div>
 
         <div class="mt-4">
             <label for="qrcode_url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">QR Code URL (optional)</label>
             <input type="text" id="qrcode_url" name="qrcode_url" class="block w-full mt-1 text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            @error('qrcode_url')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
         </div>
 
         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mt-4">Validate Ticket</button>

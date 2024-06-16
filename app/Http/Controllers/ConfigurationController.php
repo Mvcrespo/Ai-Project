@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\ConfigurationFormRequest;
 
 class ConfigurationController extends \Illuminate\Routing\Controller
 {
@@ -26,16 +27,11 @@ class ConfigurationController extends \Illuminate\Routing\Controller
     }
 
 
-    public function update(Request $request)
+    public function update(ConfigurationFormRequest $request)
     {
         $configuration = Configuration::first();
 
-        $validated = $request->validate([
-            'ticket_price' => 'required|numeric',
-            'registered_customer_ticket_discount' => 'required|numeric',
-        ]);
-
-        $configuration->update($validated);
+        $configuration->update($request->validated());
 
         return redirect()->back()->with('alert-type', 'success')->with('alert-msg', 'Configuration updated successfully.');
     }

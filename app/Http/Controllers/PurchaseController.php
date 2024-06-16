@@ -22,6 +22,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use App\Http\Requests\PurchaseFormRequest;
 
 class PurchaseController extends \Illuminate\Routing\Controller
 {
@@ -54,20 +55,14 @@ class PurchaseController extends \Illuminate\Routing\Controller
     }
 
 
-    public function store(Request $request)
+    public function store(PurchaseFormRequest $request)
     {
         $cart = collect(session()->get('cart', []));
         if ($cart->isEmpty()) {
             return back()->withErrors(['cart' => 'The cart is empty.']);
         }
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'nif' => 'required|string|max:9',
-            'payment_type' => 'required|string|in:PAYPAL,VISA,MBWAY',
-            'payment_reference' => 'required|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         $paymentSuccess = $this->validatePayment($request);
 
@@ -126,7 +121,6 @@ class PurchaseController extends \Illuminate\Routing\Controller
                     'qrcode_url' => $qrcodeUrl,
                 ]);
 
-
                 $qrCode = QrCode::create($qrcodeUrl);
                 $writer = new PngWriter();
                 $qrCodeImage = $writer->write($qrCode)->getString();
@@ -136,18 +130,14 @@ class PurchaseController extends \Illuminate\Routing\Controller
                 $tickets[] = $ticket;
             }
 
-
             $pdfReceipt = PDF::loadView('purchases.receipt', compact('purchase'));
             $pdfFilename = 'receipt_' . $purchase->id . '.pdf';
             $pdfPath = storage_path('app/pdf_purchases/' . $pdfFilename);
             $pdfReceipt->save($pdfPath);
 
-
             $purchase->update(['receipt_pdf_filename' => $pdfFilename]);
 
-
             $pdfTickets = PDF::loadView('tickets.pdf', compact('tickets', 'purchase'))->output();
-
 
             Mail::to($purchase->customer_email)->send(new PurchaseReceiptMail($purchase, $pdfPath, $pdfTickets));
 

@@ -16,14 +16,20 @@ $screening = $screening ?? new \App\Models\Screening;
 </div>
 @endif
 
-<!-- Formulário de Exclusão Fora do Formulário Principal -->
+
 <form id="screeningsDeleteForm" action="" method="POST">
     @csrf
     @method('DELETE')
 </form>
 
-<!-- Formulário Principal -->
-<form method="POST" action="{{ route('screenings.update', ['screening' => $screening]) }}">
+
+<form id="screeningsFilterForm" action="{{ $mode == 'edit' ? route('screenings.edit', ['screening' => $screening]) : route('screenings.show', ['screening' => $screening]) }}" method="GET">
+    <input type="hidden" name="filter_day" id="filter_day_input">
+    <input type="hidden" name="filter_month" id="filter_month_input">
+    <input type="hidden" name="filter_year" id="filter_year_input">
+</form>
+
+<form method="POST" action="{{ route('screenings.update', ['screening' => $screening]) }}" class="mt-6">
     @csrf
     @method('PUT')
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -38,6 +44,34 @@ $screening = $screening ?? new \App\Models\Screening;
             @enderror
         </div>
     </div>
+
+    <div class="flex my-2 space-x-2 mt-4">
+        <div>
+            <label for="filter_day" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Day</label>
+            <input type="number" name="filter_day" id="filter_day" value="{{ request('filter_day') }}" class="mt-1 block w-20 border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600">
+            @error('filter_day')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div>
+            <label for="filter_month" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Month</label>
+            <input type="number" name="filter_month" id="filter_month" value="{{ request('filter_month') }}" class="mt-1 block w-20 border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600">
+            @error('filter_month')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div>
+            <label for="filter_year" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Year</label>
+            <input type="number" name="filter_year" id="filter_year" value="{{ request('filter_year') }}" class="mt-1 block w-20 border-gray-300 rounded-md shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600">
+            @error('filter_year')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="flex items-end">
+            <button type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md" onclick="submitFilterForm()">Filter</button>
+        </div>
+    </div>
+
 
     @if(isset($relatedScreenings) && $relatedScreenings->isNotEmpty())
         <div class="mt-6">
@@ -91,11 +125,21 @@ $screening = $screening ?? new \App\Models\Screening;
             </div>
         </div>
     @endif
+
+    @if ($errors->any())
+        <div class="alert alert-danger" style="color: red; padding: 10px;">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     @if($mode == 'edit')
         <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">Save</button>
     @endif
 </form>
-<!-- Fim do Formulário Principal -->
 
 <script>
     let modifiedIds = [];
@@ -111,5 +155,12 @@ $screening = $screening ?? new \App\Models\Screening;
         const form = document.getElementById('screeningsDeleteForm');
         form.action = `/screenings/${screeningId}/destroy-single`;
         form.submit();
+    }
+
+    function submitFilterForm() {
+        document.getElementById('filter_day_input').value = document.getElementById('filter_day').value;
+        document.getElementById('filter_month_input').value = document.getElementById('filter_month').value;
+        document.getElementById('filter_year_input').value = document.getElementById('filter_year').value;
+        document.getElementById('screeningsFilterForm').submit();
     }
 </script>

@@ -121,6 +121,7 @@
         });
     }
 
+    // Initial call to set the correct state of buttons
     updateButtons();
 </script>
 @endsection

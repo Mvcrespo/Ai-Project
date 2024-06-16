@@ -14,6 +14,7 @@ use App\Models\Ticket;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ScreeningFormRequest;
+use App\Http\Requests\TicketFormRequest;
 
 class ScreeningController extends \Illuminate\Routing\Controller
 {
@@ -312,27 +313,12 @@ class ScreeningController extends \Illuminate\Routing\Controller
         return view('screenings.session_control', compact('screenings', 'search'));
     }
 
-    public function validateTicket(Request $request)
+    public function validateTicket(TicketFormRequest $request)
     {
-        $this->authorize('validateTicket', Screening::class);
+        $ticket = $request->getTicket();
 
-        $request->validate([
-            'screening_id' => 'required|exists:screenings,id',
-            'ticket_id' => 'nullable|exists:tickets,id',
-            'qrcode_url' => 'nullable|url',
-        ]);
-
-        $screening = Screening::find($request->screening_id);
-
-        $ticket = null;
-        if ($request->ticket_id) {
-            $ticket = Ticket::find($request->ticket_id);
-        } elseif ($request->qrcode_url) {
-            $ticket = Ticket::where('qrcode_url', $request->qrcode_url)->first();
-        }
-
-        if (!$ticket || $ticket->screening_id != $screening->id || $ticket->status != 'valid') {
-            return back()->with('alert-type', 'error')->with('alert-msg', 'Invalid ticket.');
+        if (!$ticket) {
+            return back()->with('alert-type', 'danger')->with('alert-msg', 'Invalid ticket.');
         }
 
         $ticket->update(['status' => 'invalid']);
@@ -340,12 +326,13 @@ class ScreeningController extends \Illuminate\Routing\Controller
         return back()->with('alert-type', 'success')->with('alert-msg', 'Ticket validated successfully.');
     }
 
-    public function getTheatersForMovie(Movie $movie)
-{
-    $theaters = Theater::whereHas('screenings', function ($query) use ($movie) {
-        $query->where('movie_id', $movie->id);
-    })->pluck('name', 'id');
 
-    return response()->json($theaters);
-}
+    public function getTheatersForMovie(Movie $movie)
+    {
+        $theaters = Theater::whereHas('screenings', function ($query) use ($movie) {
+            $query->where('movie_id', $movie->id);
+        })->pluck('name', 'id');
+
+        return response()->json($theaters);
+    }
 }
