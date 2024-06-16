@@ -13,19 +13,17 @@ use App\Models\Purchase;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
+
     public function edit(Request $request): View
     {
         $user = User::findOrFail(Auth::id());
 
-        // Verificar se o usuário é do tipo 'A' (admin) ou 'C' (customer)
+
         if ($user->type !== 'A' && $user->type !== 'C') {
             abort(403, 'Unauthorized action.');
         }
 
-        $customer = $user->customer; // Buscar informações do cliente
+        $customer = $user->customer;
 
         $purchases = Purchase::with([
             'tickets.screening.movie',
@@ -51,15 +49,12 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
+
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
         $data = $request->validated();
 
-        // Handle file upload
         if ($request->hasFile('photo_file')) {
             $file = $request->file('photo_file');
             $filename = time() . '_' . $file->getClientOriginalName();
@@ -75,7 +70,7 @@ class ProfileController extends Controller
 
         $user->save();
 
-        // Update customer details if the user is a customer
+
         if ($user->customer) {
             $customer = $user->customer;
             $customer->nif = $data['nif'] ?? null;
@@ -87,9 +82,7 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
-    /**
-     * Delete the user's account.
-     */
+
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Screening;
 
 class ScreeningFormRequest extends FormRequest
 {
@@ -13,12 +14,43 @@ class ScreeningFormRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'movie_id' => 'required|exists:movies,id',
             'theater_id' => 'required|exists:theaters,id',
-            'date' => 'required|date',
-            'start_time' => 'required|date_format:H:i',
-            'custom' => 'nullable|json',
+        ];
+
+        if ($this->isMethod('post')) {
+            $rules['screenings.*.date'] = 'required|date|before_or_equal:2025-12-31';
+            $rules['screenings.*.start_time'] = 'required|date_format:H:i';
+        } else if ($this->isMethod('put') || $this->isMethod('patch')) {
+            $screeningIds = $this->input('modified_ids', '');
+            if ($screeningIds) {
+                $screeningIds = explode(',', $screeningIds);
+                foreach ($screeningIds as $id) {
+                    $screening = Screening::find($id);
+                    if ($screening) {
+                        if ($this->input("screenings.$id.date") !== $screening->date) {
+                            $rules["screenings.$id.date"] = 'required|date|before_or_equal:2025-12-31';
+                        }
+                        if ($this->input("screenings.$id.start_time") !== $screening->start_time) {
+                            $rules["screenings.$id.start_time"] = 'required|date_format:H:i';
+                        }
+                    }
+                }
+            }
+        }
+
+        return $rules;
+    }
+
+    public function messages(): array
+    {
+        return [
+            'screenings.*.date.required' => 'The date for screening is required.',
+            'screenings.*.date.date' => 'The date for screening must be a valid date.',
+            'screenings.*.date.before_or_equal' => 'The date for screening must be on or before 2025-12-31.',
+            'screenings.*.start_time.required' => 'The start time for screening  is required.',
+            'screenings.*.start_time.date_format' => 'The start time for screening must be in the format H:i.',
         ];
     }
 }

@@ -45,7 +45,7 @@
                                         @endif
                                     </div>
                                     @if ($index == 1 || $index == $totalSeats - 3)
-                                        <div class="w-8 h-8 mx-1"></div> <!-- Corredor -->
+                                        <div class="w-8 h-8 mx-1"></div>
                                     @endif
                                 @endforeach
                                 @for ($i = 0; $i < $rightPadding; $i++)
@@ -57,7 +57,7 @@
                             </div>
                         </div>
                         @if ($loop->index == 7)
-                            <div class="h-8"></div> <!-- Espaço entre as filas após a sétima fila -->
+                            <div class="h-8"></div>
                         @endif
                     @endforeach
                 </div>
@@ -70,7 +70,7 @@
         </div>
     </div>
     <div id="selected-tickets" class="flex-1 p-4 bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-50 rounded shadow-sm mt-4 w-full max-w-md">
-        <!-- Lista de Tickets Selecionados -->
+
     </div>
     <div class="mt-4">
         <form id="add-to-cart-form" action="{{ route('cart.add') }}" method="post" class="mt-4">
@@ -121,10 +121,10 @@
     }
 
     document.getElementById('add-to-cart-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Evitar envio do formulário
+        event.preventDefault();
 
         const formContainer = document.getElementById('form-container');
-        formContainer.innerHTML = ''; // Limpar campos anteriores
+        formContainer.innerHTML = '';
 
         selectedSeats.forEach(seat => {
             formContainer.innerHTML += `
@@ -136,7 +136,7 @@
             `;
         });
 
-        // Enviar o formulário
+
         event.target.submit();
     });
 </script>

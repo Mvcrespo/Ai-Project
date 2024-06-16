@@ -155,7 +155,7 @@
 
 
                     <!-- Only one option -->
-                    <x-menus.admin-group-menu-items class="mt-2" title="Voltar ao site" :options="['Home' => route('movies.high')]">
+                    <x-menus.admin-group-menu-items class="mt-2" title="Return to website" :options="['Home' => route('movies.high')]">
                         <svg class="w-6 h-6 text-gray-400 dark:text-white" width="24" height="24"
                             viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                             stroke-linecap="round" stroke-linejoin="round">

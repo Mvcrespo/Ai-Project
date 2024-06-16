@@ -187,10 +187,8 @@
                 }
             };
 
-            // Inicializa o tema
             updateTheme(userTheme);
 
-            // Adiciona evento de clique no botão
             themeToggleBtn.addEventListener('click', () => {
                 if (htmlElement.classList.contains('dark')) {
                     updateTheme('light');
@@ -216,14 +214,13 @@
                 }
             }
 
-            // Fetch updated cart total from the server periodically
             setInterval(() => {
                 fetch('{{ route("cart.total") }}')
                     .then(response => response.json())
                     .then(data => {
                         updateCartTotal(data.total);
                     });
-            }, 60000); // Update every minute
+            }, 60000);
         });
     </script>
 </body>

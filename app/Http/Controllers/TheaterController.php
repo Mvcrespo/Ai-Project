@@ -36,7 +36,7 @@ class TheaterController extends \Illuminate\Routing\Controller
 
     public function store(TheaterFormRequest $request): RedirectResponse
     {
-        // Save the theater
+
         $newTheater = Theater::create($request->validated());
 
         if ($request->hasFile('photo_file')) {
@@ -45,7 +45,7 @@ class TheaterController extends \Illuminate\Routing\Controller
             $newTheater->save();
         }
 
-        // Process and save seat layout
+
         $seatLayout = json_decode($request->input('seat_layout'), true);
         if ($seatLayout) {
             foreach ($seatLayout as $row => $seats) {
@@ -73,7 +73,7 @@ class TheaterController extends \Illuminate\Routing\Controller
         $mode = 'edit';
         $readonly = false;
 
-        // Recuperar os assentos existentes
+
         $seats = Seat::where('theater_id', $theater->id)->get();
         $seatLayout = [];
 
@@ -92,7 +92,7 @@ class TheaterController extends \Illuminate\Routing\Controller
         $mode = 'show';
         $readonly = true;
 
-        // Recuperar os assentos existentes
+
         $seats = Seat::where('theater_id', $theater->id)->get();
         $seatLayout = [];
 
@@ -112,7 +112,7 @@ class TheaterController extends \Illuminate\Routing\Controller
         $theater->update($request->validated());
 
         if ($request->hasFile('photo_file')) {
-            // Delete previous file (if any)
+
             if ($theater->photo_filename && Storage::exists('public/theaters/' . $theater->photo_filename)) {
                 Storage::delete('public/theaters/' . $theater->photo_filename);
             }
@@ -121,10 +121,10 @@ class TheaterController extends \Illuminate\Routing\Controller
             $theater->save();
         }
 
-        // Update seat layout
+
         $seatLayout = json_decode($request->input('seat_layout'), true);
 
-        // Retrieve existing seats, including soft deleted seats
+
         $existingSeats = Seat::withTrashed()->where('theater_id', $theater->id)->get();
         $existingSeatMap = [];
         foreach ($existingSeats as $seat) {
@@ -134,7 +134,7 @@ class TheaterController extends \Illuminate\Routing\Controller
             $existingSeatMap[$seat->row][$seat->seat_number] = $seat;
         }
 
-        // Process new layout to determine added and removed seats
+
         $newSeatMap = [];
         foreach ($seatLayout as $row => $seats) {
             foreach ($seats as $seatNumber) {
@@ -145,19 +145,19 @@ class TheaterController extends \Illuminate\Routing\Controller
             }
         }
 
-        // Determine seats to add or reactivate
+
         foreach ($newSeatMap as $row => $seats) {
             foreach ($seats as $seatNumber) {
                 if (isset($existingSeatMap[$row][$seatNumber])) {
                     $seat = $existingSeatMap[$row][$seatNumber];
                     if ($seat->trashed()) {
-                        // Reactivate soft deleted seat
+
                         $seat->restore();
                         $seat->deleted_at = null;
                         $seat->save();
                     }
                 } else {
-                    // Add new seat
+
                     Seat::create([
                         'theater_id' => $theater->id,
                         'row' => $row,
@@ -167,11 +167,11 @@ class TheaterController extends \Illuminate\Routing\Controller
             }
         }
 
-        // Determine seats to soft delete
+
         foreach ($existingSeatMap as $row => $seats) {
             foreach ($seats as $seatNumber => $seat) {
                 if (!isset($newSeatMap[$row]) || !in_array($seatNumber, $newSeatMap[$row])) {
-                    // Soft delete seat
+
                     $seat->delete();
                 }
             }

@@ -28,20 +28,20 @@ class MovieController extends \Illuminate\Routing\Controller
             $query->where('title', 'like', '%' . $request->input('search') . '%');
         }
 
-        $movies = $query->orderBy('title')->paginate(20); // Ordena por título e paginação de 20 por página
+        $movies = $query->orderBy('title')->paginate(20);
         return view('movies.index')->with('movies', $movies);
     }
 
     public function create(): View
     {
         $newmovie = new Movie();
-        $genres = Genre::all(); // Obtenha todos os gêneros
+        $genres = Genre::all();
         return view('movies.create')->with(['movie' => $newmovie, 'genres' => $genres]);
     }
 
     public function store(MovieFormRequest $request): RedirectResponse
     {
-        // Validate and handle file upload
+
         $data = $request->validated();
         if ($request->hasFile('poster_filename')) {
             $file = $request->file('poster_filename');
@@ -50,7 +50,7 @@ class MovieController extends \Illuminate\Routing\Controller
             $data['poster_filename'] = $filename;
         }
 
-        // Create new movie
+
         $newMovie = Movie::create($data);
         $url = route('movies.show', ['movie' => $newMovie]);
         $htmlMessage = "Movie <a href='$url'><u>{$newMovie->title}</u></a> ({$newMovie->id}) has been created successfully!";
@@ -62,13 +62,13 @@ class MovieController extends \Illuminate\Routing\Controller
 
     public function edit(Movie $movie): View
     {
-        $genres = Genre::all(); // Obtenha todos os gêneros
+        $genres = Genre::all();
         return view('movies.edit')->with(['movie' => $movie, 'genres' => $genres]);
     }
 
     public function update(MovieFormRequest $request, Movie $movie): RedirectResponse
     {
-        // Handle file upload
+
         $data = $request->validated();
         if ($request->hasFile('poster_filename')) {
             $file = $request->file('poster_filename');
@@ -76,7 +76,7 @@ class MovieController extends \Illuminate\Routing\Controller
             $file->storeAs('public/posters', $filename);
             $data['poster_filename'] = $filename;
         } else {
-            // Keep the original poster_filename if no new file is uploaded
+
             $data['poster_filename'] = $movie->poster_filename;
         }
 
@@ -102,17 +102,17 @@ class MovieController extends \Illuminate\Routing\Controller
 
     public function destroyPoster(Movie $movie): RedirectResponse
     {
-        // Check if the movie has a poster filename
+
         if ($movie->poster_filename) {
             $filePath = 'public/posters/' . $movie->poster_filename;
 
-            // Check if the file exists in the storage
+
             if (Storage::exists($filePath)) {
-                // Delete the file from the storage
+
                 Storage::delete($filePath);
             }
 
-            // Update the movie's poster filename to null
+
             $movie->poster_filename = null;
             $movie->save();
 
@@ -128,7 +128,7 @@ class MovieController extends \Illuminate\Routing\Controller
 
     public function show(Movie $movie): View
     {
-        $genres = Genre::all(); // Obtenha todos os gêneros
+        $genres = Genre::all();
         return view('movies.show')->with(['movie' => $movie, 'genres' => $genres]);
     }
 
@@ -150,7 +150,7 @@ class MovieController extends \Illuminate\Routing\Controller
             ->when($genre, function ($queryBuilder) use ($genre) {
                 $queryBuilder->where('genre_code', $genre);
             })
-            ->paginate(10); // Paginação para 10 filmes por página
+            ->paginate(10);
 
         $genres = Genre::all();
 
@@ -175,7 +175,7 @@ class MovieController extends \Illuminate\Routing\Controller
             ->when($genre, function ($queryBuilder) use ($genre) {
                 $queryBuilder->where('genre_code', $genre);
             })
-            ->paginate(10); // Paginação para 10 filmes por página
+            ->paginate(10);
 
         $genres = Genre::all();
 
@@ -187,7 +187,7 @@ class MovieController extends \Illuminate\Routing\Controller
         $query = $request->input('query');
         $genre = $request->input('genre');
 
-        // Realiza a consulta com os filtros aplicados
+
         $movies = Movie::with('screenings.theater', 'screenings.tickets')
             ->whereHas('screenings', function($query) {
                 $query->whereBetween('date', [now(), now()->addWeeks(2)]);
@@ -201,7 +201,7 @@ class MovieController extends \Illuminate\Routing\Controller
             ->when($genre, function ($queryBuilder) use ($genre) {
                 $queryBuilder->where('genre_code', $genre);
             })
-            ->paginate(10); // Paginação para 10 filmes por página
+            ->paginate(10);
 
         $genres = Genre::all();
 

@@ -34,6 +34,14 @@
                         @endcan
                     </td>
                 @endif
+                @if($showDelete)
+                @can('delete', $screening)
+                    <td>
+                        <x-table.icon-delete class="px-0.5"
+                            action="{{ route('screenings.destroy', ['screening' => $screening]) }}"/>
+                    </td>
+                @endcan
+            @endif
             </tr>
         @empty
             <tr>

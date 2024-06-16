@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use App\Models\Ticket;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\ScreeningFormRequest;
 
 class ScreeningController extends \Illuminate\Routing\Controller
 {
@@ -28,7 +29,6 @@ class ScreeningController extends \Illuminate\Routing\Controller
     {
         $search = $request->input('search');
 
-        // Obter todos os screenings e agrupar por theater_id e movie_id
         $query = Screening::select('screenings.*')
             ->join('theaters', 'screenings.theater_id', '=', 'theaters.id')
             ->join('movies', 'screenings.movie_id', '=', 'movies.id')
@@ -44,7 +44,6 @@ class ScreeningController extends \Illuminate\Routing\Controller
             return $screening->theater_id . '-' . $screening->movie_id;
         });
 
-        // Paginar os resultados agrupados
         $perPage = 20;
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $currentItems = $screenings->slice(($currentPage - 1) * $perPage, $perPage)->values();
@@ -64,15 +63,9 @@ class ScreeningController extends \Illuminate\Routing\Controller
     }
 
 
-    public function store(Request $request)
+    public function store(ScreeningFormRequest $request): RedirectResponse
     {
-        $data = $request->validate([
-            'movie_id' => 'required|exists:movies,id',
-            'theater_id' => 'required|exists:theaters,id',
-            'screenings.*.date' => 'required|date|before_or_equal:2024-12-31',
-            'screenings.*.start_time' => 'required|date_format:H:i',
-        ]);
-
+        $data = $request->validated();
         foreach ($data['screenings'] as $screeningData) {
             Screening::create([
                 'movie_id' => $data['movie_id'],
@@ -91,15 +84,13 @@ class ScreeningController extends \Illuminate\Routing\Controller
 
 
 
-    public function update(Request $request, Screening $screening)
+    public function update(ScreeningFormRequest $request, Screening $screening): RedirectResponse
     {
         $modifiedIds = explode(',', $request->input('modified_ids'));
 
-        // Verifica se o filme ou o teatro foi alterado
         $movieChanged = $request->has('movie_id') && $request->input('movie_id') != $screening->movie_id;
         $theaterChanged = $request->has('theater_id') && $request->input('theater_id') != $screening->theater_id;
 
-        // Atualiza o filme e/ou o teatro em todas as sessões se nenhum ticket existir
         if ($movieChanged || $theaterChanged) {
             $relatedScreenings = Screening::where('movie_id', $screening->movie_id)
                                             ->where('theater_id', $screening->theater_id)
@@ -127,7 +118,7 @@ class ScreeningController extends \Illuminate\Routing\Controller
                 }
             }
 
-            // Atualiza o filme e/ou o teatro da sessão atual
+
             if ($movieChanged) {
                 $screening->movie_id = $request->input('movie_id');
             }
@@ -137,34 +128,14 @@ class ScreeningController extends \Illuminate\Routing\Controller
             $screening->save();
         }
 
-        foreach ($modifiedIds as $id) {
-            $rules = [];
-            $messages = [];
+        $validatedData = $request->validated();
 
-            // Recupera a exibição pelo ID
+        foreach ($modifiedIds as $id) {
             $currentScreening = Screening::find($id);
             if (!$currentScreening || $currentScreening->tickets()->exists()) {
-                continue; // Skip updating if the screening has tickets
+                continue;
             }
 
-            // Adiciona regra de validação para a data apenas se ela foi preenchida e diferente do valor original
-            if ($request->has("screenings.$id.date") && $request->input("screenings.$id.date") !== $currentScreening->date) {
-                $rules["screenings.$id.date"] = 'date';
-                $messages["screenings.$id.date.date"] = "The date for screening $id must be a valid date.";
-            }
-
-            // Adiciona regra de validação para o horário de início apenas se ele foi preenchido e diferente do valor original
-            if ($request->has("screenings.$id.start_time") && $request->input("screenings.$id.start_time") !== $currentScreening->start_time) {
-                $rules["screenings.$id.start_time"] = 'date_format:H:i';
-                $messages["screenings.$id.start_time.date_format"] = "The start time for screening $id must be in the format H:i.";
-            }
-
-            // Valida apenas os campos que foram modificados
-            if (!empty($rules)) {
-                $request->validate($rules, $messages);
-            }
-
-            // Atualiza os campos modificados
             $updateData = [];
             if ($request->has("screenings.$id.date") && $request->input("screenings.$id.date") !== $currentScreening->date) {
                 $updateData['date'] = $request->input("screenings.$id.date");
@@ -183,24 +154,18 @@ class ScreeningController extends \Illuminate\Routing\Controller
                          ->with('alert-msg', 'Screenings updated successfully.');
     }
 
-
-
-
-
-
-
-
     public function edit(Screening $screening, Request $request): View
     {
         $movies = Movie::all()->pluck('title', 'id')->toArray();
         $theaters = Theater::all()->pluck('name', 'id')->toArray();
 
-        // Validação dos campos de filtro
+
         $request->validate([
             'filter_day' => 'nullable|integer|min:1|max:31',
             'filter_month' => 'nullable|integer|min:1|max:12',
             'filter_year' => 'nullable|integer|min:1900|max:2024' . date('Y'),
         ]);
+
 
         $query = Screening::where('movie_id', $screening->movie_id)
             ->where('theater_id', $screening->theater_id)
@@ -229,7 +194,7 @@ class ScreeningController extends \Illuminate\Routing\Controller
         $movies = Movie::all()->pluck('title', 'id')->toArray();
         $theaters = Theater::all()->pluck('name', 'id')->toArray();
 
-        // Validação dos campos de filtro
+
         $request->validate([
             'filter_day' => 'nullable|integer|min:1|max:31',
             'filter_month' => 'nullable|integer|min:1|max:12',
@@ -262,12 +227,57 @@ class ScreeningController extends \Illuminate\Routing\Controller
 
     public function destroy(Screening $screening): RedirectResponse
     {
-        $screening->delete();
+        $relatedScreenings = Screening::where('movie_id', $screening->movie_id)
+                                        ->where('theater_id', $screening->theater_id)
+                                        ->get();
+
+        foreach ($relatedScreenings as $relatedScreening) {
+            if ($relatedScreening->tickets()->exists()) {
+                return redirect()->route('screenings.index')
+                    ->with('alert-type', 'danger')
+                    ->with('alert-msg', 'Cannot delete screenings because there are tickets associated.');
+            }
+        }
+
+        foreach ($relatedScreenings as $relatedScreening) {
+            $relatedScreening->delete();
+        }
 
         return redirect()->route('screenings.index')
             ->with('alert-type', 'success')
+            ->with('alert-msg', 'All related screenings deleted successfully!');
+    }
+
+    public function destroySingle(Screening $screening): RedirectResponse
+    {
+        if ($screening->tickets()->exists()) {
+            return redirect()->route('screenings.edit', ['screening' => $screening->id])
+                ->with('alert-type', 'danger')
+                ->with('alert-msg', 'Cannot delete screening because there are tickets associated.');
+        }
+
+        $movieId = $screening->movie_id;
+        $theaterId = $screening->theater_id;
+
+        $screening->delete();
+
+        $originalScreening = Screening::where('movie_id', $movieId)
+                                        ->where('theater_id', $theaterId)
+                                        ->first();
+
+        if (!$originalScreening) {
+            return redirect()->route('screenings.index')
+                ->with('alert-type', 'success')
+                ->with('alert-msg', 'Screening deleted successfully!');
+        }
+
+        return redirect()->route('screenings.edit', ['screening' => $originalScreening->id])
+            ->with('alert-type', 'success')
             ->with('alert-msg', 'Screening deleted successfully!');
     }
+
+
+
 
     public function selectSession(Request $request)
     {

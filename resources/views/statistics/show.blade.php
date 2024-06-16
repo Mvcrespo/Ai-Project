@@ -45,7 +45,6 @@
                             </tr>
                         </thead>
                         <tbody class="bg-gray-100 dark:bg-gray-700">
-                            <!-- Rows will be inserted here by JavaScript -->
                         </tbody>
                     </table>
                 </div>
@@ -60,7 +59,6 @@
                             </tr>
                         </thead>
                         <tbody class="bg-gray-100 dark:bg-gray-700">
-                            <!-- Rows will be inserted here by JavaScript -->
                         </tbody>
                     </table>
                 </div>

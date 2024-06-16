@@ -12,9 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class SeatController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         $seats = Seat::all();

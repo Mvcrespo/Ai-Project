@@ -13,9 +13,7 @@ class ConfigurationController extends \Illuminate\Routing\Controller
 {
     use AuthorizesRequests;
 
-    /**
-     * Show the form for editing the configuration.
-     */
+
     public function edit()
     {
         $this->authorize('view', Auth::user());
@@ -27,9 +25,7 @@ class ConfigurationController extends \Illuminate\Routing\Controller
         return response()->json($config);
     }
 
-    /**
-     * Update the specified configuration in storage.
-     */
+
     public function update(Request $request)
     {
         $configuration = Configuration::first();

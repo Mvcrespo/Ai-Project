@@ -12,7 +12,6 @@
         }
     }
 
-    // Definindo as opções para o campo de seleção
     $typeOptions = [
         'A' => 'Admin',
         'E' => 'Employee',

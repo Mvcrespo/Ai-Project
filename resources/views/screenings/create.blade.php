@@ -52,7 +52,6 @@
                                         <button type="button" class="btn btn-success add-screening">
                                             <x-table.icon-add class="px-0.5"/>
                                         </button>
-                                        <!-- No remove button for the first row -->
                                     </td>
                                 </tr>
                             </tbody>
@@ -122,7 +121,6 @@
         });
     }
 
-    // Initial call to set the correct state of buttons
     updateButtons();
 </script>
 @endsection

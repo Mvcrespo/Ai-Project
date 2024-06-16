@@ -23,7 +23,7 @@ class UserController extends \Illuminate\Routing\Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $query = User::withTrashed(); // Incluir usuários soft deletados
+        $query = User::withTrashed();
 
         if ($request->has('type') && $request->type != '') {
             $type = $request->type;
@@ -33,12 +33,12 @@ class UserController extends \Illuminate\Routing\Controller
             $query->where('type', $type);
         }
 
-        // Se o usuário autenticado for um funcionário, exclua clientes da lista
+
         if (auth()->user()->type === 'E') {
             $query->whereIn('type', ['A', 'E']);
         }
 
-        // Ordenar usuários de forma que os soft deletados apareçam no final
+
         $users = $query->orderByRaw('deleted_at IS NOT NULL, name')->paginate(20);
 
         return view('users.index', compact('users'));
@@ -52,7 +52,7 @@ class UserController extends \Illuminate\Routing\Controller
 
     public function store(UserFormRequest $request): RedirectResponse
     {
-        // Handle file upload
+
         $data = $request->validated();
         if ($request->hasFile('photo_file')) {
             $file = $request->file('photo_file');
@@ -61,7 +61,7 @@ class UserController extends \Illuminate\Routing\Controller
             $data['photo_filename'] = $filename;
         }
 
-        // Hash the password before saving
+
         $data['password'] = Hash::make($data['password']);
 
         $newUser = User::create($data);
@@ -88,7 +88,7 @@ class UserController extends \Illuminate\Routing\Controller
     {
         $this->authorize('update', $user);
 
-        // Handle file upload
+
         $data = $request->validated();
         if ($request->hasFile('photo_file')) {
             $file = $request->file('photo_file');
@@ -96,7 +96,7 @@ class UserController extends \Illuminate\Routing\Controller
             $file->storeAs('public/photos', $filename);
             $data['photo_filename'] = $filename;
         } else {
-            // Keep the original photo_filename if no new file is uploaded
+
             $data['photo_filename'] = $user->photo_filename;
         }
 
@@ -112,7 +112,7 @@ class UserController extends \Illuminate\Routing\Controller
     {
         $this->authorize('delete', $user);
 
-        $user->delete(); // Soft delete
+        $user->delete();
 
         $alertType = 'success';
         $alertMsg = "User {$user->name} ({$user->id}) has been deleted!";

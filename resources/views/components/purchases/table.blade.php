@@ -11,7 +11,7 @@
                 @if($showView)
                     <th></th>
                 @endif
-                <th></th> <!-- Nova coluna para o botão de download -->
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -33,7 +33,6 @@
                             <td></td>
                         @endcan
                     @endif
-                    <!-- Botão de download -->
                     <td>
                         @if($purchase->receipt_pdf_filename)
                             <a href="{{ route('purchase.download', $purchase->id) }}" class="text-white px-3 py-1 rounded-lg">

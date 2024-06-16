@@ -17,7 +17,6 @@ class Theater extends Model
         'photo_filename',
     ];
 
-    // Defina as relações, por exemplo:
     public function screenings()
     {
         return $this->hasMany(Screening::class);

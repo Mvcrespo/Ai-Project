@@ -14,7 +14,7 @@
                 @if($showDelete)
                     <th></th>
                 @endif
-                <th></th> <!-- Coluna para bloqueio/desbloqueio -->
+                <th></th>
             </tr>
         </thead>
         <tbody>

@@ -74,7 +74,6 @@
         </div>
     </div>
 
-    <!-- Purchases and Tickets Section -->
     <div class="p-4 sm:p-8 bg-white dark:bg-gray-900 shadow sm:rounded-lg mt-6">
         <div class="max-w-full">
             <section>
@@ -100,7 +99,6 @@
                             </div>
                         </div>
                         <p class="dark:text-gray-400">Purchase ID: {{ $purchase->id }}</p>
-                        <!-- Additional details initially hidden -->
                         <div class="hidden dark:text-gray-400 mt-2" id="tickets-{{ $purchase->id }}">
                             <p >Total Price: ${{ $purchase->total_price }}</p>
                             <p>Payment Type: {{ $purchase->payment_type }}</p>
@@ -145,7 +143,6 @@
                     </div>
                 @endforeach
 
-                <!-- Links de paginação -->
                 <div class="mt-4">
                     {{ $purchases->links() }}
                 </div>

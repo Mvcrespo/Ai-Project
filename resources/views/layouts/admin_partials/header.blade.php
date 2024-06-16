@@ -72,10 +72,8 @@
             }
         };
 
-        // Inicializa o tema
         updateTheme(userTheme);
 
-        // Adiciona evento de clique no botão
         themeToggleCheckbox.addEventListener('change', () => {
             if (themeToggleCheckbox.checked) {
                 updateTheme('dark');

@@ -24,11 +24,11 @@ class ProfileUpdateRequest extends FormRequest
             'photo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
 
-        // Adicionar regras condicionais para payment_ref usando o serviÃ§o de pagamento
+
         $paymentRef = $this->input('payment_ref');
         if ($this->input('payment_type') === 'VISA') {
             $rules['payment_ref'] = ['required', 'digits:16', function ($attribute, $value, $fail) use ($paymentRef) {
-                if (!Payment::payWithVisa($paymentRef, '123')) { // '123' is a placeholder for CVV which is not checked here
+                if (!Payment::payWithVisa($paymentRef, '123')) {
                     $fail('The payment reference is not valid for VISA.');
                 }
             }];

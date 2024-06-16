@@ -25,8 +25,6 @@ class GenreFormRequest extends FormRequest
             'name' => 'required|string|max:255',
         ];
         if (empty($this->genre)) {
-            // This will merge 2 arrays:
-            // (adds the "abbreviation" rule to the $rules array)
             $rules = array_merge($rules, [
                 'code' => 'required|string|max:20|unique:genres,code',
             ]);

@@ -59,7 +59,7 @@ class GenreController extends \Illuminate\Routing\Controller
 
     public function destroy(Genre $genre): RedirectResponse
     {
-        // Verificar se há filmes associados ao gênero
+
         $moviesCount = Movie::where('genre_code', $genre->code)->count();
 
         if ($moviesCount > 0) {

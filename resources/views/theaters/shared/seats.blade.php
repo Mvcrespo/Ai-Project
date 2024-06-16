@@ -37,7 +37,6 @@
     </div>
 
     <div id="seat-layout" class="flex flex-wrap justify-center bg-gray-100 dark:bg-gray-800 p-4 mt-4 rounded-lg shadow-inner">
-        <!-- Seat layout will be generated here -->
     </div>
 
     @if ($mode !== 'show')
@@ -63,12 +62,12 @@
             const numColsElement = document.getElementById('num-cols');
             const numRows = numRowsElement ? numRowsElement.value : Object.keys(initialLayout).length;
             const numCols = numColsElement ? numColsElement.value : Math.max(...Object.values(initialLayout).map(seats => seats.length));
-            seatLayoutContainer.innerHTML = ''; // Clear existing layout
+            seatLayoutContainer.innerHTML = '';
 
             let seatLayout = {};
 
             for (let i = 0; i < numRows; i++) {
-                const rowLabel = String.fromCharCode(65 + i); // Convert index to letter (A, B, C, etc.)
+                const rowLabel = String.fromCharCode(65 + i);
                 const rowDiv = document.createElement('div');
                 rowDiv.classList.add('flex', 'w-full', 'mb-2', 'justify-center');
                 const rowLabelSpanStart = document.createElement('span');

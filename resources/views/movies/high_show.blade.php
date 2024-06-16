@@ -51,7 +51,7 @@
                     </select>
                 </div>
                 <div id="session-details" class="mb-4">
-                    <!-- Session details will be populated here -->
+
                 </div>
                 <div id="go-to-theater" class="hidden">
                     <a href="#" id="theater-link" class="inline-block px-6 py-2 text-white bg-blue-500 rounded hover:bg-blue-600">Buy Ticket</a>

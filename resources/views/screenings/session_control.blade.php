@@ -6,13 +6,11 @@
 <div class="container mx-auto p-4">
     <h1 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Select Screening Session</h1>
 
-    <!-- Formulário de busca -->
     <form action="{{ route('session.control') }}" method="GET" class="mb-4 flex items-center gap-4">
         <input type="text" name="search" class="form-control block w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Search for a movie, date (e.g., 2024-06-14 or 06-14), year, or theater..." value="{{ request('search') }}">
         <button type="submit" class="btn btn-primary bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Search</button>
     </form>
 
-    <!-- Sessão selecionada -->
     <div id="selected-session" class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg hidden">
         <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Selected Session</h2>
         <div class="text-gray-900 dark:text-gray-100">
@@ -23,7 +21,6 @@
         </div>
     </div>
 
-    <!-- Lista de sessões de exibição -->
     <form action="{{ route('session.validate') }}" method="POST" class="mb-4">
         @csrf
         <div class="overflow-x-auto border border-gray-300 dark:border-gray-600 rounded-lg max-h-96 overflow-y-scroll">

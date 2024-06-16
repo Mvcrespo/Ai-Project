@@ -18,8 +18,6 @@ class TheaterFormRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        // Adds the user information (from the theater route parameter) to the Request
-        // if it is a post, user = null
         if (strtolower($this->getMethod()) == 'post') {
             $this->merge([
                 'user' => null,
@@ -40,7 +38,7 @@ class TheaterFormRequest extends FormRequest
     {
         return [
             'name' => 'required|string|min:2|max:255|unique:theaters,name,'.($this->theater?$this->theater->id:null),
-            'photo_file' => 'sometimes|image|max:4096', // maxsize = 4Mb
+            'photo_file' => 'sometimes|image|max:4096',
         ];
     }
 }

@@ -12,17 +12,17 @@ class Seat extends Model
 {
     use HasFactory, SoftDeletes;
 
-    public $timestamps = false; // Corrigido aqui para timestamps
+    public $timestamps = false;
 
     protected $fillable = ['theater_id', 'row', 'seat_number'];
 
     public function tickets(): HasMany
     {
-        return $this->hasMany(Ticket::class); // Removido parênteses
+        return $this->hasMany(Ticket::class);
     }
 
     public function theater(): BelongsTo
     {
-        return $this->belongsTo(Theater::class)->withTrashed(); // Removido parênteses
+        return $this->belongsTo(Theater::class)->withTrashed();
     }
 }

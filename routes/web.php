@@ -72,6 +72,7 @@ Route::get('/session-control', [ScreeningController::class, 'selectSession'])->n
 Route::post('/session-control', [ScreeningController::class, 'validateTicket'])->name('session.validate');
 Route::put('screenings/{screening}', [ScreeningController::class, 'update'])->name('screenings.update');
 Route::post('/screenings/bulk-update/{screening}', [ScreeningController::class, 'update'])->name('screenings.bulkUpdate');
+Route::delete('/screenings/{screening}/destroy-single', [ScreeningController::class, 'destroySingle'])->name('screenings.destroySingle');
 
 Route::get('/statistics', [StatisticsController::class, 'show'])->name('statistics.show');
 Route::get('/statistics/overall-stats', [StatisticsController::class, 'overallStats'])->name('statistics.overallStats');

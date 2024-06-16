@@ -47,17 +47,13 @@ class PurchaseController extends \Illuminate\Routing\Controller
         return view('purchases.index', compact('purchases'));
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function show(Purchase $purchase)
     {
         return view('purchases.show', compact('purchase'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
         $cart = collect(session()->get('cart', []));
@@ -119,7 +115,7 @@ class PurchaseController extends \Illuminate\Routing\Controller
             $tickets = [];
             foreach ($cart as $cartItem) {
                 $finalPrice = $cartItem['price'] - $discount;
-                $qrcodeUrl = url('/tickets/validate/' . Str::random(40)); // Generating a unique URL for the QR code
+                $qrcodeUrl = url('/tickets/validate/' . Str::random(40));
 
                 $ticket = Ticket::create([
                     'screening_id' => $cartItem['screening_id'],
@@ -130,7 +126,7 @@ class PurchaseController extends \Illuminate\Routing\Controller
                     'qrcode_url' => $qrcodeUrl,
                 ]);
 
-                // Save QR code using Endroid QR Code
+
                 $qrCode = QrCode::create($qrcodeUrl);
                 $writer = new PngWriter();
                 $qrCodeImage = $writer->write($qrCode)->getString();
@@ -140,19 +136,19 @@ class PurchaseController extends \Illuminate\Routing\Controller
                 $tickets[] = $ticket;
             }
 
-            // Generate the receipt PDF and save it
+
             $pdfReceipt = PDF::loadView('purchases.receipt', compact('purchase'));
             $pdfFilename = 'receipt_' . $purchase->id . '.pdf';
             $pdfPath = storage_path('app/pdf_purchases/' . $pdfFilename);
             $pdfReceipt->save($pdfPath);
 
-            // Update the purchase with the receipt PDF filename
+
             $purchase->update(['receipt_pdf_filename' => $pdfFilename]);
 
-            // Generate the tickets PDF without saving
+
             $pdfTickets = PDF::loadView('tickets.pdf', compact('tickets', 'purchase'))->output();
 
-            // Send the email with the receipt and tickets PDFs as attachments
+
             Mail::to($purchase->customer_email)->send(new PurchaseReceiptMail($purchase, $pdfPath, $pdfTickets));
 
             session()->forget('cart');
@@ -162,9 +158,7 @@ class PurchaseController extends \Illuminate\Routing\Controller
     }
 
 
-    /**
-     * Validate payment details based on payment type.
-     */
+
     protected function validatePayment(Request $request): bool
     {
         switch ($request->input('payment_type')) {
@@ -184,21 +178,21 @@ class PurchaseController extends \Illuminate\Routing\Controller
 
     public function download(Purchase $purchase)
     {
-        // Verifica se o usuário está autenticado
+
         if (!Auth::check()) {
             return redirect()->back()->with('alert-type', 'error')->with('alert-msg', 'You must be logged in to download the PDF.');
         }
 
-        // Verifica se o arquivo PDF está presente
+
         if (is_null($purchase->receipt_pdf_filename)) {
             return redirect()->back()->with('alert-type', 'error')->with('alert-msg', 'No PDF available for download.');
         }
 
-        // Verifica se o usuário é admin
+
         if (Auth::user()->type === 'A') {
             $canDownload = true;
         } else {
-            // Verifica se a compra pertence ao usuário logado
+
             $canDownload = $purchase->customer_id === Auth::id();
         }
 
@@ -206,13 +200,13 @@ class PurchaseController extends \Illuminate\Routing\Controller
             return redirect()->back()->with('alert-type', 'error')->with('alert-msg', 'Unauthorized action.');
         }
 
-        // Gera o caminho correto do arquivo PDF
+
         $pdfPath = storage_path('app/' . $purchase->receipt_pdf_filename);
 
-        // Normaliza o caminho do arquivo
+
         $normalizedPdfPath = realpath($pdfPath);
 
-        // Verifica se o arquivo existe no caminho normalizado
+
         if ($normalizedPdfPath && file_exists($normalizedPdfPath)) {
             return response()->download($normalizedPdfPath);
         } else {
