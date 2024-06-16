@@ -189,15 +189,26 @@ class TheaterController extends \Illuminate\Routing\Controller
 
     public function destroy(Theater $theater): RedirectResponse
     {
-        try {
-            $url = route('theaters.show', ['theater' => $theater]);
-            $theater->delete();
-            $alertType = 'success';
-            $alertMsg = "Theater {$theater->name} ({$theater->id}) has been deleted successfully!";
-        } catch (\Exception $error) {
+        $today = now()->startOfDay();
+        $hasFutureScreenings = $theater->screenings()
+            ->where('date', '>=', $today)
+            ->exists();
+
+        if ($hasFutureScreenings) {
             $alertType = 'danger';
-            $alertMsg = "It was not possible to delete the theater <a href='$url'><u>{$theater->name}</u></a> ({$theater->id}) because there was an error with the operation!";
+            $alertMsg = "It is not possible to delete the theater {$theater->name} ({$theater->id}) because it has future screenings!";
+        } else {
+            try {
+                $theater->delete();
+                $alertType = 'success';
+                $alertMsg = "Theater {$theater->name} ({$theater->id}) has been deleted successfully!";
+            } catch (\Exception $error) {
+                $url = route('theaters.show', ['theater' => $theater]);
+                $alertType = 'danger';
+                $alertMsg = "It was not possible to delete the theater <a href='$url'><u>{$theater->name}</u></a> ({$theater->id}) because there was an error with the operation!";
+            }
         }
+
         return redirect()->route('theaters.index')
             ->with('alert-type', $alertType)
             ->with('alert-msg', $alertMsg);

@@ -90,15 +90,31 @@ class MovieController extends \Illuminate\Routing\Controller
 
     public function destroy(Movie $movie): RedirectResponse
     {
-        $movie->delete();
+        $today = now()->startOfDay();
+        $hasFutureScreenings = $movie->screenings()
+            ->where('date', '>=', $today)
+            ->exists();
 
-        $alertType = 'success';
-        $alertMsg = "Movie {$movie->title} ({$movie->id}) has been deleted successfully!";
+        if ($hasFutureScreenings) {
+            $alertType = 'danger';
+            $alertMsg = "It is not possible to delete the movie {$movie->title} ({$movie->id}) because it has future screenings!";
+        } else {
+            try {
+                $movie->delete();
+                $alertType = 'success';
+                $alertMsg = "Movie {$movie->title} ({$movie->id}) has been deleted successfully!";
+            } catch (\Exception $error) {
+                $url = route('movies.show', ['movie' => $movie]);
+                $alertType = 'danger';
+                $alertMsg = "It was not possible to delete the movie <a href='$url'><u>{$movie->title}</u></a> ({$movie->id}) because there was an error with the operation!";
+            }
+        }
 
         return redirect()->route('movies.index')
             ->with('alert-type', $alertType)
             ->with('alert-msg', $alertMsg);
     }
+
 
     public function destroyPoster(Movie $movie): RedirectResponse
     {
@@ -139,7 +155,7 @@ class MovieController extends \Illuminate\Routing\Controller
 
         $movies = Movie::with('screenings')
             ->whereHas('screenings', function($query) {
-                $query->whereBetween('date', [now(), now()->addWeeks(2)]);
+                $query->whereBetween('date', [now()->startOfDay(), now()->addWeeks(2)->endOfDay()]);
             })
             ->when($query, function ($queryBuilder) use ($query) {
                 $queryBuilder->where(function ($query) use ($queryBuilder) {
@@ -164,7 +180,7 @@ class MovieController extends \Illuminate\Routing\Controller
 
         $movies = Movie::with('screenings')
             ->whereHas('screenings', function($query) {
-                $query->whereBetween('date', [now(), now()->addWeeks(2)]);
+                $query->whereBetween('date', [now()->startOfDay(), now()->addWeeks(2)->endOfDay()]);
             })
             ->when($query, function ($queryBuilder) use ($query) {
                 $queryBuilder->where(function ($query) use ($queryBuilder) {
@@ -190,7 +206,7 @@ class MovieController extends \Illuminate\Routing\Controller
 
         $movies = Movie::with('screenings.theater', 'screenings.tickets')
             ->whereHas('screenings', function($query) {
-                $query->whereBetween('date', [now(), now()->addWeeks(2)]);
+                $query->whereBetween('date', [now()->startOfDay(), now()->addWeeks(2)->endOfDay()]);
             })
             ->when($query, function ($queryBuilder) use ($query) {
                 $queryBuilder->where(function ($queryBuilder) use ($query) {

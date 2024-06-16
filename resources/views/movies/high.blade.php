@@ -1,4 +1,3 @@
-{{-- resources/views/movies/high.blade.php --}}
 @extends('layouts.main')
 
 @section('header-title', 'Movies On Show')
@@ -17,25 +16,8 @@
                     </select>
                     <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md">Search</button>
                 </form>
-                @php
-                    $highlightedMovies = $movies->filter(function($movie) {
-                        return $movie->screenings->whereBetween('date', [now(), now()->addWeeks(2)])->isNotEmpty();
-                    });
 
-                    if (request('query')) {
-                        $highlightedMovies = $highlightedMovies->filter(function($movie) {
-                            return str_contains(strtolower($movie->title), strtolower(request('query'))) ||
-                                   str_contains(strtolower($movie->synopsis), strtolower(request('query')));
-                        });
-                    }
-
-                    if (request('genre')) {
-                        $highlightedMovies = $highlightedMovies->filter(function($movie) {
-                            return $movie->genre_code == request('genre');
-                        });
-                    }
-                @endphp
-                @include('movies.shared.movies-list', ['movies' => $highlightedMovies])
+                @include('movies.shared.movies-list', ['movies' => $movies])
             </div>
         </div>
         <div class="mt-4 flex justify-center">
