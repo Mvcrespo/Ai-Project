@@ -33,11 +33,14 @@ class UserController extends \Illuminate\Routing\Controller
             $query->where('type', $type);
         }
 
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('name', 'LIKE', '%' . $search . '%');
+        }
 
         if (auth()->user()->type === 'E') {
             $query->whereIn('type', ['A', 'E']);
         }
-
 
         $users = $query->orderByRaw('deleted_at IS NOT NULL, name')->paginate(20);
 
